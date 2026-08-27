@@ -1,188 +1,73 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
+import { FadeInView } from '@/components/ProfessionalMotion';
 
 export default function WorkoutsScreen() {
   const { routines, exercises } = useStore();
 
-  const getExerciseName = (id: string) => {
-    return exercises.find((e) => e.id === id)?.name || 'Unknown';
-  };
-
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Workouts</Text>
+      <FadeInView>
+        <Text style={styles.header}>Workouts</Text>
+      </FadeInView>
 
-      {/* Empty Workout Button */}
-      <TouchableOpacity style={styles.emptyButton}>
-        <Text style={styles.emptyButtonText}>+ Empty Workout</Text>
-        <Text style={styles.emptyButtonSubtext}>Start without a template</Text>
-      </TouchableOpacity>
+      <FadeInView delay={100}>
+        <TouchableOpacity style={styles.emptyButton}>
+          <Text style={styles.emptyButtonText}>+ QUICK START</Text>
+        </TouchableOpacity>
+      </FadeInView>
 
-      {/* Routines */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Saved Workouts</Text>
-        
+      <FadeInView delay={200}>
+        <Text style={styles.sectionTitle}>SAVED WORKOUTS</Text>
         {routines.map((routine) => (
-          <TouchableOpacity key={routine.id} style={styles.routineCard}>
-            <View style={styles.routineHeader}>
+          <View key={routine.id} style={styles.routineRow}>
+            <View style={{ flex: 1 }}>
               <Text style={styles.routineName}>{routine.name}</Text>
-              <Text style={styles.routineCount}>
-                {routine.exercises.length} exercises
-              </Text>
+              <Text style={styles.routineMeta}>{routine.exercises.length} EXERCISES</Text>
             </View>
-            
-            <View style={styles.exerciseList}>
-              {routine.exercises.slice(0, 3).map((ex, idx) => (
-                <Text key={idx} style={styles.exerciseName}>
-                  {getExerciseName(ex.exerciseId)} - {ex.targetSets}x{ex.targetReps}
-                </Text>
-              ))}
-              {routine.exercises.length > 3 && (
-                <Text style={styles.moreText}>
-                  +{routine.exercises.length - 3} more
-                </Text>
-              )}
-            </View>
-
-            <TouchableOpacity style={styles.startButton}>
-              <Text style={styles.startButtonText}>START</Text>
+            <TouchableOpacity style={styles.actionButton}>
+              <Text style={styles.actionButtonText}>START</Text>
             </TouchableOpacity>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Exercise Library */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Exercise Library</Text>
-        <Text style={styles.sectionSubtitle}>{exercises.length} exercises</Text>
-        
-        {exercises.map((exercise) => (
-          <View key={exercise.id} style={styles.exerciseItem}>
-            <View>
-              <Text style={styles.exerciseItemName}>{exercise.name}</Text>
-              <Text style={styles.exerciseItemMuscle}>{exercise.muscle}</Text>
-            </View>
-            <Text style={styles.exerciseItemEquipment}>{exercise.equipment}</Text>
           </View>
         ))}
-      </View>
+      </FadeInView>
+
+      <FadeInView delay={300}>
+        <Text style={styles.sectionTitle}>EXERCISE LIBRARY</Text>
+        {exercises.map((exercise) => (
+          <View key={exercise.id} style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.name}>{exercise.name}</Text>
+              <Text style={styles.meta}>{exercise.muscle.toUpperCase()}</Text>
+            </View>
+            <Text style={styles.equipment}>{exercise.equipment.toUpperCase()}</Text>
+          </View>
+        ))}
+      </FadeInView>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  content: {
-    padding: Spacing.lg,
-    paddingTop: 60,
-  },
-  title: {
-    fontSize: FontSize.title,
-    fontWeight: 'bold',
-    color: Colors.text,
-    marginBottom: Spacing.lg,
-  },
-  emptyButton: {
-    backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.lg,
-    alignItems: 'center',
-    marginBottom: Spacing.xl,
-  },
-  emptyButtonText: {
-    fontSize: FontSize.lg,
-    fontWeight: 'bold',
-    color: Colors.white,
-  },
-  emptyButtonSubtext: {
-    fontSize: FontSize.sm,
-    color: Colors.white,
-    opacity: 0.8,
-    marginTop: Spacing.xs,
-  },
-  section: {
-    marginBottom: Spacing.xl,
-  },
-  sectionTitle: {
-    fontSize: FontSize.lg,
-    fontWeight: 'bold',
-    color: Colors.text,
-    marginBottom: Spacing.sm,
-  },
-  sectionSubtitle: {
-    fontSize: FontSize.sm,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.md,
-  },
-  routineCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
-    marginBottom: Spacing.md,
-  },
-  routineHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.sm,
-  },
-  routineName: {
-    fontSize: FontSize.lg,
-    fontWeight: '600',
-    color: Colors.text,
-  },
-  routineCount: {
-    fontSize: FontSize.sm,
-    color: Colors.textSecondary,
-  },
-  exerciseList: {
-    marginBottom: Spacing.md,
-  },
-  exerciseName: {
-    fontSize: FontSize.sm,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.xs,
-  },
-  moreText: {
-    fontSize: FontSize.sm,
-    color: Colors.primary,
-  },
-  startButton: {
-    backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.sm,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.lg,
-    alignSelf: 'flex-start',
-  },
-  startButtonText: {
-    fontSize: FontSize.sm,
-    fontWeight: 'bold',
-    color: Colors.white,
-  },
-  exerciseItem: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.sm,
-    padding: Spacing.md,
-    marginBottom: Spacing.sm,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  exerciseItemName: {
-    fontSize: FontSize.md,
-    color: Colors.text,
-  },
-  exerciseItemMuscle: {
-    fontSize: FontSize.sm,
-    color: Colors.textSecondary,
-    marginTop: Spacing.xs,
-  },
-  exerciseItemEquipment: {
-    fontSize: FontSize.sm,
-    color: Colors.textMuted,
-  },
+  container: { flex: 1, backgroundColor: Colors.background },
+  content: { padding: Spacing.lg, paddingTop: 60 },
+  header: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.text, marginBottom: Spacing.lg },
+  
+  emptyButton: { backgroundColor: Colors.primary, padding: Spacing.md, borderRadius: BorderRadius.md, alignItems: 'center', marginBottom: Spacing.xl },
+  emptyButtonText: { color: Colors.white, fontWeight: '700', fontSize: FontSize.md },
+  
+  sectionTitle: { fontSize: 12, fontWeight: '700', color: Colors.textMuted, marginBottom: Spacing.md, letterSpacing: 1 },
+  
+  routineRow: { flexDirection: 'row', backgroundColor: Colors.surface, padding: Spacing.md, borderRadius: BorderRadius.md, marginBottom: Spacing.sm, alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
+  routineName: { fontSize: FontSize.md, fontWeight: '600', color: Colors.text },
+  routineMeta: { fontSize: 10, color: Colors.textMuted, marginTop: 4 },
+  
+  row: { flexDirection: 'row', paddingVertical: Spacing.md, borderBottomWidth: 1, borderBottomColor: Colors.border, alignItems: 'center' },
+  name: { fontSize: FontSize.md, color: Colors.text },
+  meta: { fontSize: 10, color: Colors.textMuted, marginTop: 4 },
+  equipment: { fontSize: 10, color: Colors.primary, fontWeight: '600' },
+  
+  actionButton: { backgroundColor: Colors.surfaceLight, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm, borderRadius: BorderRadius.sm },
+  actionButtonText: { color: Colors.primary, fontWeight: '700', fontSize: 12 },
 });
