@@ -1,8 +1,9 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
-import { calculateLevelProgress } from '@/constants/rpg';
+import { calculateLevelProgress, getRankColor } from '@/constants/rpg';
 import { formatNumber } from '@/utils';
+import { FadeInView } from '@/components/ProfessionalMotion';
 
 export default function DashboardScreen() {
   const { profile, friends } = useStore();
@@ -15,42 +16,50 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.header}>Dashboard</Text>
+      <FadeInView>
+        <Text style={styles.header}>Dashboard</Text>
+      </FadeInView>
 
-      <View style={styles.statsContainer}>
-        <View style={styles.statBox}>
-           <Text style={styles.statValue}>{profile.level}</Text>
-           <Text style={styles.statLabel}>LEVEL</Text>
-        </View>
-        <View style={styles.statBox}>
-           <Text style={styles.statValue}>{profile.totalWorkouts}</Text>
-           <Text style={styles.statLabel}>SESSIONS</Text>
-        </View>
-        <View style={styles.statBox}>
-           <Text style={styles.statValue}>{profile.currentStreak}</Text>
-           <Text style={styles.statLabel}>STREAK</Text>
-        </View>
-      </View>
-      
-      <View style={styles.xpBox}>
-        <Text style={styles.xpValue}>{formatNumber(profile.xp)} / XP</Text>
-        <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: ${levelProgress}% }]} />
-        </View>
-      </View>
-
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Leaderboard</Text>
-      </View>
-      <View style={styles.table}>
-        {allFriends.map((friend, index) => (
-          <View key={friend.id} style={styles.row}>
-            <Text style={styles.rank}>#{index + 1}</Text>
-            <Text style={styles.name}>{friend.name}</Text>
-            <Text style={styles.volume}>{formatNumber(friend.totalVolume)}kg</Text>
+      {/* Utility-First Stats Row */}
+      <FadeInView delay={100}>
+        <View style={styles.statsContainer}>
+          <View style={styles.statBox}>
+             <Text style={styles.statValue}>{profile.level}</Text>
+             <Text style={styles.statLabel}>LEVEL</Text>
           </View>
-        ))}
-      </View>
+          <View style={styles.statBox}>
+             <Text style={styles.statValue}>{profile.totalWorkouts}</Text>
+             <Text style={styles.statLabel}>SESSIONS</Text>
+          </View>
+          <View style={styles.statBox}>
+             <Text style={styles.statValue}>{profile.currentStreak}</Text>
+             <Text style={styles.statLabel}>STREAK</Text>
+          </View>
+        </View>
+        
+        <View style={styles.xpBox}>
+          <Text style={styles.xpValue}>{formatNumber(profile.xp)} / XP</Text>
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: \\%\ }]} />
+          </View>
+        </View>
+      </FadeInView>
+
+      {/* Dense Leaderboard Table */}
+      <FadeInView delay={200}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Leaderboard</Text>
+        </View>
+        <View style={styles.table}>
+          {allFriends.map((friend, index) => (
+            <View key={friend.id} style={styles.row}>
+              <Text style={styles.rank}>#{index + 1}</Text>
+              <Text style={styles.name}>{friend.name}</Text>
+              <Text style={styles.volume}>{formatNumber(friend.totalVolume)}kg</Text>
+            </View>
+          ))}
+        </View>
+      </FadeInView>
     </ScrollView>
   );
 }
