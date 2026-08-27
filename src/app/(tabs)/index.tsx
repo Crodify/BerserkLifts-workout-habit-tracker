@@ -7,7 +7,6 @@ import { formatNumber } from '@/utils';
 export default function DashboardScreen() {
   const { profile, friends } = useStore();
   const levelProgress = calculateLevelProgress(profile.xp);
-  const rankColor = getRankColor(profile.rank);
 
   const allFriends = [
     { ...profile, name: 'You', isUser: true },
@@ -16,56 +15,60 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Header */}
-      <Text style={styles.greeting}>Dashboard</Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.titlePrefix}>COMMAND CENTER</Text>
+        <Text style={styles.greeting}>DASHBOARD</Text>
+      </View>
 
-      {/* Rank Card */}
       <View style={styles.rankCard}>
         <View style={styles.rankLeft}>
-          <Text style={[styles.rankLetter, { color: rankColor }]}>{profile.rank}</Text>
-          <Text style={styles.levelText}>Level {profile.level}</Text>
+          <Text style={[styles.rankLetter, { color: Colors.primary }]}>{profile.rank}</Text>
+          <Text style={styles.levelText}>LVL {profile.level}</Text>
         </View>
         <View style={styles.rankRight}>
-          <Text style={styles.xpText}>{formatNumber(profile.xp)} XP</Text>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${levelProgress}%` }]} />
+          <View style={styles.xpRow}>
+            <Text style={styles.xpText}>{formatNumber(profile.xp)}</Text>
+            <Text style={styles.xpLabel}> / XP</Text>
           </View>
-          <Text style={styles.progressText}>{Math.round(levelProgress)}%</Text>
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: ${levelProgress}% }]} />
+          </View>
+          <Text style={styles.progressText}>{Math.round(levelProgress)}% COMPLETED</Text>
         </View>
       </View>
 
-      {/* Stats Row */}
       <View style={styles.statsRow}>
         <View style={styles.statBox}>
           <Text style={styles.statValue}>{profile.totalWorkouts}</Text>
-          <Text style={styles.statLabel}>Workouts</Text>
+          <Text style={styles.statLabel}>WORKOUTS</Text>
         </View>
         <View style={styles.statBox}>
-          <Text style={styles.statValue}>{formatNumber(profile.totalVolume)}kg</Text>
-          <Text style={styles.statLabel}>Total Volume</Text>
+          <Text style={styles.statValue}>{formatNumber(profile.totalVolume)}<Text style={styles.unitText}>KG</Text></Text>
+          <Text style={styles.statLabel}>VOLUME</Text>
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statValue}>{profile.currentStreak}</Text>
-          <Text style={styles.statLabel}>Day Streak</Text>
+          <Text style={styles.statLabel}>STREAK</Text>
         </View>
       </View>
 
-      {/* Leaderboard */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Leaderboard</Text>
-        <Text style={styles.sectionSubtitle}>Ranked by total weight volume</Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>LEADERBOARD</Text>
+          <Text style={styles.sectionTag}>VOLUME</Text>
+        </View>
         
         {allFriends.map((friend, index) => (
           <View key={friend.id} style={styles.leaderboardItem}>
             <Text style={styles.rank}>#{index + 1}</Text>
             <Text style={styles.friendAvatar}>{friend.avatar}</Text>
             <View style={styles.friendInfo}>
-              <Text style={styles.friendName}>{friend.name}</Text>
+              <Text style={styles.friendName}>{friend.name.toUpperCase()}</Text>
               <Text style={[styles.friendRank, { color: getRankColor(friend.rank) }]}>
-                {friend.rank} Rank
+                RANK {friend.rank}
               </Text>
             </View>
-            <Text style={styles.friendVolume}>{formatNumber(friend.totalVolume)}kg</Text>
+            <Text style={styles.friendVolume}>{formatNumber(friend.totalVolume)} KG</Text>
           </View>
         ))}
       </View>
@@ -82,45 +85,75 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     paddingTop: 60,
   },
+  headerContainer: {
+    marginBottom: Spacing.lg,
+  },
+  titlePrefix: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: Colors.primary,
+    letterSpacing: 2,
+    marginBottom: 2,
+  },
   greeting: {
     fontSize: FontSize.title,
-    fontWeight: 'bold',
+    fontWeight: '900',
     color: Colors.text,
-    marginBottom: Spacing.lg,
+    letterSpacing: 1,
   },
   rankCard: {
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderLeftWidth: 4,
+    borderLeftColor: Colors.primary,
   },
   rankLeft: {
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.surfaceLight,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
+    minWidth: 70,
   },
   rankLetter: {
-    fontSize: 48,
-    fontWeight: 'bold',
+    fontSize: 36,
+    fontWeight: '900',
   },
   levelText: {
-    fontSize: FontSize.sm,
+    fontSize: 10,
+    fontWeight: '800',
     color: Colors.textSecondary,
-    marginTop: Spacing.xs,
+    marginTop: 2,
+    letterSpacing: 1,
   },
   rankRight: {
     flex: 1,
     marginLeft: Spacing.lg,
   },
+  xpRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginBottom: Spacing.xs,
+  },
   xpText: {
     fontSize: FontSize.xl,
-    fontWeight: 'bold',
+    fontWeight: '900',
     color: Colors.text,
-    marginBottom: Spacing.sm,
+  },
+  xpLabel: {
+    fontSize: FontSize.xs,
+    fontWeight: '700',
+    color: Colors.primary,
   },
   progressBar: {
-    height: 8,
+    height: 6,
     backgroundColor: Colors.surfaceLight,
     borderRadius: BorderRadius.full,
     overflow: 'hidden',
@@ -131,10 +164,12 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   progressText: {
-    fontSize: FontSize.xs,
-    color: Colors.textSecondary,
+    fontSize: 9,
+    fontWeight: '800',
+    color: Colors.textMuted,
     textAlign: 'right',
     marginTop: Spacing.xs,
+    letterSpacing: 0.5,
   },
   statsRow: {
     flexDirection: 'row',
@@ -146,32 +181,52 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
     flex: 1,
-    marginHorizontal: Spacing.xs,
+    marginHorizontal: 4,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   statValue: {
     fontSize: FontSize.xl,
-    fontWeight: 'bold',
+    fontWeight: '900',
+    color: Colors.text,
+  },
+  unitText: {
+    fontSize: 10,
     color: Colors.primary,
+    fontWeight: '800',
   },
   statLabel: {
-    fontSize: FontSize.xs,
-    color: Colors.textSecondary,
-    marginTop: Spacing.xs,
+    fontSize: 9,
+    fontWeight: '800',
+    color: Colors.textMuted,
+    marginTop: 4,
+    letterSpacing: 1,
   },
   section: {
     marginBottom: Spacing.lg,
   },
-  sectionTitle: {
-    fontSize: FontSize.lg,
-    fontWeight: 'bold',
-    color: Colors.text,
-    marginBottom: Spacing.xs,
-  },
-  sectionSubtitle: {
-    fontSize: FontSize.sm,
-    color: Colors.textSecondary,
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: Spacing.md,
+  },
+  sectionTitle: {
+    fontSize: FontSize.md,
+    fontWeight: '900',
+    color: Colors.text,
+    letterSpacing: 1,
+  },
+  sectionTag: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: Colors.primary,
+    backgroundColor: 'rgba(255, 26, 60, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.sm,
+    letterSpacing: 1,
   },
   leaderboardItem: {
     backgroundColor: Colors.surface,
@@ -179,32 +234,38 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.xs,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   rank: {
-    fontSize: FontSize.md,
-    fontWeight: 'bold',
-    color: Colors.textSecondary,
-    width: 30,
+    fontSize: FontSize.sm,
+    fontWeight: '900',
+    color: Colors.primary,
+    width: 28,
   },
   friendAvatar: {
-    fontSize: 24,
+    fontSize: 20,
     marginRight: Spacing.md,
   },
   friendInfo: {
     flex: 1,
   },
   friendName: {
-    fontSize: FontSize.md,
-    fontWeight: '600',
+    fontSize: FontSize.sm,
+    fontWeight: '800',
     color: Colors.text,
+    letterSpacing: 0.5,
   },
   friendRank: {
-    fontSize: FontSize.xs,
-    marginTop: Spacing.xs,
+    fontSize: 9,
+    fontWeight: '800',
+    marginTop: 2,
+    letterSpacing: 0.5,
   },
   friendVolume: {
     fontSize: FontSize.sm,
+    fontWeight: '800',
     color: Colors.textSecondary,
   },
 });
