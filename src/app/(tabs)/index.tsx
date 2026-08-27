@@ -1,14 +1,12 @@
-﻿import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
 import { calculateLevelProgress, getRankColor } from '@/constants/rpg';
 import { formatNumber } from '@/utils';
-import { FadeInView } from '@/components/ProfessionalMotion';
 
 export default function DashboardScreen() {
   const { profile, friends } = useStore();
   const levelProgress = calculateLevelProgress(profile.xp);
-  const rankColor = getRankColor(profile.rank);
 
   const allFriends = [
     { ...profile, name: 'You', isUser: true },
@@ -17,63 +15,55 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <FadeInView>
-        <Text style={styles.greeting}>Dashboard</Text>
-      </FadeInView>
+      <Text style={styles.greeting}>Dashboard</Text>
 
-      <FadeInView delay={100}>
-        <View style={styles.rankCard}>
-          <View style={styles.rankLeft}>
-            <Text style={[styles.rankLetter, { color: Colors.primary }]}>{profile.rank}</Text>
-            <Text style={styles.levelText}>Level {profile.level}</Text>
+      <View style={styles.rankCard}>
+        <View style={styles.rankLeft}>
+          <Text style={[styles.rankLetter, { color: Colors.primary }]}>{profile.rank}</Text>
+          <Text style={styles.levelText}>Level {profile.level}</Text>
+        </View>
+        <View style={styles.rankRight}>
+          <Text style={styles.xpText}>{formatNumber(profile.xp)} XP</Text>
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: `%` }]} />
           </View>
-          <View style={styles.rankRight}>
-            <Text style={styles.xpText}>{formatNumber(profile.xp)} XP</Text>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: ${levelProgress}% }]} />
+          <Text style={styles.progressText}>{Math.round(levelProgress)}%</Text>
+        </View>
+      </View>
+
+      <View style={styles.statsRow}>
+        <View style={styles.statBox}>
+          <Text style={styles.statValue}>{profile.totalWorkouts}</Text>
+          <Text style={styles.statLabel}>Workouts</Text>
+        </View>
+        <View style={styles.statBox}>
+          <Text style={styles.statValue}>{formatNumber(profile.totalVolume)}kg</Text>
+          <Text style={styles.statLabel}>Volume</Text>
+        </View>
+        <View style={styles.statBox}>
+          <Text style={styles.statValue}>{profile.currentStreak}</Text>
+          <Text style={styles.statLabel}>Streak</Text>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Leaderboard</Text>
+        <Text style={styles.sectionSubtitle}>Top performers by volume</Text>
+        
+        {allFriends.map((friend, index) => (
+          <View key={friend.id} style={styles.leaderboardItem}>
+            <Text style={styles.rank}>#{index + 1}</Text>
+            <Text style={styles.friendAvatar}>{friend.avatar}</Text>
+            <View style={styles.friendInfo}>
+              <Text style={styles.friendName}>{friend.name}</Text>
+              <Text style={[styles.friendRank, { color: Colors.accent }]}>
+                {friend.rank} Rank
+              </Text>
             </View>
-            <Text style={styles.progressText}>{Math.round(levelProgress)}%</Text>
+            <Text style={styles.friendVolume}>{formatNumber(friend.totalVolume)}kg</Text>
           </View>
-        </View>
-      </FadeInView>
-
-      <FadeInView delay={200}>
-        <View style={styles.statsRow}>
-          <View style={styles.statBox}>
-            <Text style={styles.statValue}>{profile.totalWorkouts}</Text>
-            <Text style={styles.statLabel}>Workouts</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statValue}>{formatNumber(profile.totalVolume)}kg</Text>
-            <Text style={styles.statLabel}>Volume</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statValue}>{profile.currentStreak}</Text>
-            <Text style={styles.statLabel}>Streak</Text>
-          </View>
-        </View>
-      </FadeInView>
-
-      <FadeInView delay={300}>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Leaderboard</Text>
-          <Text style={styles.sectionSubtitle}>Top performers by volume</Text>
-          
-          {allFriends.map((friend, index) => (
-            <View key={friend.id} style={styles.leaderboardItem}>
-              <Text style={styles.rank}>#{index + 1}</Text>
-              <Text style={styles.friendAvatar}>{friend.avatar}</Text>
-              <View style={styles.friendInfo}>
-                <Text style={styles.friendName}>{friend.name}</Text>
-                <Text style={[styles.friendRank, { color: Colors.accent }]}>
-                  {friend.rank} Rank
-                </Text>
-              </View>
-              <Text style={styles.friendVolume}>{formatNumber(friend.totalVolume)}kg</Text>
-            </View>
-          ))}
-        </View>
-      </FadeInView>
+        ))}
+      </View>
     </ScrollView>
   );
 }
@@ -172,7 +162,7 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: FontSize.xs,
     color: Colors.textMuted,
-    marginTop: Spacing.xxs,
+    marginTop: Spacing.xs,
     textTransform: 'uppercase',
   },
   section: {
