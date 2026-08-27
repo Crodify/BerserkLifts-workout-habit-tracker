@@ -12,7 +12,7 @@ interface LogWorkoutFlowProps {
 }
 
 export function LogWorkoutFlow({ visible, onClose }: LogWorkoutFlowProps) {
-  const { logWorkout } = useStore();
+  const store = useStore();
   const [screen, setScreen] = useState<'muscles' | 'sets'>('muscles');
   const [selectedMuscles, setSelectedMuscles] = useState<string[]>([]);
   const [showLevelUp, setShowLevelUp] = useState(false);
@@ -26,17 +26,8 @@ export function LogWorkoutFlow({ visible, onClose }: LogWorkoutFlowProps) {
   };
 
   const handleSetLoggingSubmit = (data: { exerciseName: string; sets: number; reps: number; weight: number }) => {
-    const result = logWorkout(data);
-    
-    if (result.leveledUp) {
-      setLevelUpData({ newLevel: result.newLevel });
-      setShowLevelUp(true);
-      setTimeout(() => {
-        resetAndClose();
-      }, 3000);
-    } else {
-      resetAndClose();
-    }
+    store.addXP(50);
+    resetAndClose();
   };
 
   const handleSetLoggingBack = () => {

@@ -60,7 +60,7 @@ export function SplashLoader({ onFinish }: { onFinish: () => void }) {
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill as any,
     backgroundColor: Colors.background,
     justifyContent: 'center',
     alignItems: 'center',

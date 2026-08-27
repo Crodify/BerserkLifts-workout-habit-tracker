@@ -39,15 +39,19 @@ export default function ProgressScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>RECENT WORKOUTS</Text>
         {workouts && workouts.length > 0 ? (
-          workouts.slice(0, 10).map((w) => (
-            <View key={w.id} style={styles.workoutRow}>
-              <View style={styles.workoutInfo}>
-                <Text style={styles.exerciseName}>{w.exerciseName}</Text>
-                <Text style={styles.workoutStats}>{w.sets}x{w.reps} @ {w.weight}kg</Text>
+          workouts.slice(0, 10).map((w) => {
+            const exerciseNames = w.exercises ? w.exercises.map((e) => e.exerciseName).join(', ') : '';
+            const totalSets = w.exercises ? w.exercises.reduce((acc, e) => acc + (e.sets ? e.sets.length : 0), 0) : 0;
+            return (
+              <View key={w.id} style={styles.workoutRow}>
+                <View style={styles.workoutInfo}>
+                  <Text style={styles.exerciseName}>{w.name || 'Workout'}</Text>
+                  <Text style={styles.workoutStats}>{exerciseNames || `${totalSets} sets`} • {w.totalVolume}kg</Text>
+                </View>
+                {w.xpGained ? <Text style={styles.xpGained}>+{w.xpGained} XP</Text> : null}
               </View>
-              <Text style={styles.xpGained}>+{w.xpGained} XP</Text>
-            </View>
-          ))
+            );
+          })
         ) : (
           <Text style={styles.emptyText}>No workouts logged yet</Text>
         )}

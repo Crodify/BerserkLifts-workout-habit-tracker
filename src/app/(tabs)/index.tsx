@@ -77,7 +77,7 @@ export default function DashboardScreen() {
                   <Text style={styles.xpLabel}> / XP</Text>
                 </View>
                 <View style={styles.progressBar}>
-                  <View style={[styles.progressFill, { width: levelProgress + '%' }]} />
+                  <View style={[styles.progressFill, { width: `${levelProgress}%` as any }]} />
                 </View>
                 <Text style={styles.progressText}>{Math.round(levelProgress)}% COMPLETED</Text>
               </View>
@@ -116,7 +116,7 @@ export default function DashboardScreen() {
                 />
               ) : (
                 allFriends.map((friend, index) => (
-                  <TouchableOpacity key={friend.id} style={[styles.leaderboardItem, friend.isUser && styles.leaderboardItemYou]} activeOpacity={0.8}>
+                  <TouchableOpacity key={friend.id} style={[styles.leaderboardItem, 'isUser' in friend && (friend as any).isUser && styles.leaderboardItemYou]} activeOpacity={0.8}>
                     <Text style={styles.rank}>#{index + 1}</Text>
                     <Text style={styles.friendAvatar}>{friend.avatar}</Text>
                     <View style={styles.friendInfo}>

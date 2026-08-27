@@ -29,7 +29,7 @@ export function LogWorkoutModal({ visible, onClose, onSubmit }: LogWorkoutProps)
   };
 
   return (
-    <Modal visible={visible} transparent={true} animationType= slide onRequestClose={onClose}>
+    <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -41,21 +41,21 @@ export function LogWorkoutModal({ visible, onClose, onSubmit }: LogWorkoutProps)
         <ScrollView style={styles.content} contentContainerStyle={styles.contentInner}>
           <View style={styles.formGroup}>
             <Text style={styles.label}>EXERCISE</Text>
-            <TextInput style={styles.input} placeholder=e.g. Bench Press placeholderTextColor={Colors.textMuted} value={exerciseName} onChangeText={setExerciseName} />
+            <TextInput style={styles.input} placeholder="e.g. Bench Press" placeholderTextColor={Colors.textMuted} value={exerciseName} onChangeText={setExerciseName} />
           </View>
           <View style={styles.row}>
             <View style={[styles.formGroup, { flex: 1, marginRight: Spacing.md }]}>
               <Text style={styles.label}>SETS</Text>
-              <TextInput style={styles.input} placeholder=3 value={sets} onChangeText={setSets} keyboardType=number-pad />
+              <TextInput style={styles.input} placeholder="3" value={sets} onChangeText={setSets} keyboardType="number-pad" />
             </View>
             <View style={[styles.formGroup, { flex: 1 }]}>
               <Text style={styles.label}>REPS</Text>
-              <TextInput style={styles.input} placeholder=10 value={reps} onChangeText={setReps} keyboardType=number-pad />
+              <TextInput style={styles.input} placeholder="10" value={reps} onChangeText={setReps} keyboardType="number-pad" />
             </View>
           </View>
           <View style={styles.formGroup}>
             <Text style={styles.label}>WEIGHT (KG)</Text>
-            <TextInput style={styles.input} placeholder=0 value={weight} onChangeText={setWeight} keyboardType=decimal-pad />
+            <TextInput style={styles.input} placeholder="0" value={weight} onChangeText={setWeight} keyboardType="decimal-pad" />
           </View>
         </ScrollView>
         <View style={styles.footer}>
