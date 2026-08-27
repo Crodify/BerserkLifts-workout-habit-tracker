@@ -31,7 +31,7 @@ export default function DashboardScreen() {
             <Text style={styles.xpLabel}> / XP</Text>
           </View>
           <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: \`${levelProgress}%` }]} />
+            <View style={[styles.progressFill, { width: levelProgress + "%" }]} />
           </View>
           <Text style={styles.progressText}>{Math.round(levelProgress)}% COMPLETED</Text>
         </View>
@@ -269,5 +269,6 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
 });
+
 
 
