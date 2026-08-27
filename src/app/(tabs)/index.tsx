@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+﻿import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
 import { calculateLevelProgress, getRankColor } from '@/constants/rpg';
 import { formatNumber } from '@/utils';
+import { FadeInView } from '@/components/ProfessionalMotion';
 
 export default function DashboardScreen() {
   const { profile, friends } = useStore();
@@ -16,59 +17,63 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Header */}
-      <Text style={styles.greeting}>Dashboard</Text>
+      <FadeInView>
+        <Text style={styles.greeting}>Dashboard</Text>
+      </FadeInView>
 
-      {/* Rank Card */}
-      <View style={styles.rankCard}>
-        <View style={styles.rankLeft}>
-          <Text style={[styles.rankLetter, { color: rankColor }]}>{profile.rank}</Text>
-          <Text style={styles.levelText}>Level {profile.level}</Text>
-        </View>
-        <View style={styles.rankRight}>
-          <Text style={styles.xpText}>{formatNumber(profile.xp)} XP</Text>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${levelProgress}%` }]} />
+      <FadeInView delay={100}>
+        <View style={styles.rankCard}>
+          <View style={styles.rankLeft}>
+            <Text style={[styles.rankLetter, { color: Colors.primary }]}>{profile.rank}</Text>
+            <Text style={styles.levelText}>Level {profile.level}</Text>
           </View>
-          <Text style={styles.progressText}>{Math.round(levelProgress)}%</Text>
-        </View>
-      </View>
-
-      {/* Stats Row */}
-      <View style={styles.statsRow}>
-        <View style={styles.statBox}>
-          <Text style={styles.statValue}>{profile.totalWorkouts}</Text>
-          <Text style={styles.statLabel}>Workouts</Text>
-        </View>
-        <View style={styles.statBox}>
-          <Text style={styles.statValue}>{formatNumber(profile.totalVolume)}kg</Text>
-          <Text style={styles.statLabel}>Total Volume</Text>
-        </View>
-        <View style={styles.statBox}>
-          <Text style={styles.statValue}>{profile.currentStreak}</Text>
-          <Text style={styles.statLabel}>Day Streak</Text>
-        </View>
-      </View>
-
-      {/* Leaderboard */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Leaderboard</Text>
-        <Text style={styles.sectionSubtitle}>Ranked by total weight volume</Text>
-        
-        {allFriends.map((friend, index) => (
-          <View key={friend.id} style={styles.leaderboardItem}>
-            <Text style={styles.rank}>#{index + 1}</Text>
-            <Text style={styles.friendAvatar}>{friend.avatar}</Text>
-            <View style={styles.friendInfo}>
-              <Text style={styles.friendName}>{friend.name}</Text>
-              <Text style={[styles.friendRank, { color: getRankColor(friend.rank) }]}>
-                {friend.rank} Rank
-              </Text>
+          <View style={styles.rankRight}>
+            <Text style={styles.xpText}>{formatNumber(profile.xp)} XP</Text>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: ${levelProgress}% }]} />
             </View>
-            <Text style={styles.friendVolume}>{formatNumber(friend.totalVolume)}kg</Text>
+            <Text style={styles.progressText}>{Math.round(levelProgress)}%</Text>
           </View>
-        ))}
-      </View>
+        </View>
+      </FadeInView>
+
+      <FadeInView delay={200}>
+        <View style={styles.statsRow}>
+          <View style={styles.statBox}>
+            <Text style={styles.statValue}>{profile.totalWorkouts}</Text>
+            <Text style={styles.statLabel}>Workouts</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statValue}>{formatNumber(profile.totalVolume)}kg</Text>
+            <Text style={styles.statLabel}>Volume</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statValue}>{profile.currentStreak}</Text>
+            <Text style={styles.statLabel}>Streak</Text>
+          </View>
+        </View>
+      </FadeInView>
+
+      <FadeInView delay={300}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Leaderboard</Text>
+          <Text style={styles.sectionSubtitle}>Top performers by volume</Text>
+          
+          {allFriends.map((friend, index) => (
+            <View key={friend.id} style={styles.leaderboardItem}>
+              <Text style={styles.rank}>#{index + 1}</Text>
+              <Text style={styles.friendAvatar}>{friend.avatar}</Text>
+              <View style={styles.friendInfo}>
+                <Text style={styles.friendName}>{friend.name}</Text>
+                <Text style={[styles.friendRank, { color: Colors.accent }]}>
+                  {friend.rank} Rank
+                </Text>
+              </View>
+              <Text style={styles.friendVolume}>{formatNumber(friend.totalVolume)}kg</Text>
+            </View>
+          ))}
+        </View>
+      </FadeInView>
     </ScrollView>
   );
 }
@@ -80,13 +85,14 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: Spacing.lg,
-    paddingTop: 60,
+    paddingTop: Spacing.xxl * 1.5,
   },
   greeting: {
-    fontSize: FontSize.title,
-    fontWeight: 'bold',
+    fontSize: FontSize.hero,
+    fontWeight: '800',
     color: Colors.text,
     marginBottom: Spacing.lg,
+    letterSpacing: -0.5,
   },
   rankCard: {
     backgroundColor: Colors.surface,
@@ -96,18 +102,25 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   rankLeft: {
     alignItems: 'center',
+    backgroundColor: Colors.surfaceLight,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
   },
   rankLetter: {
-    fontSize: 48,
-    fontWeight: 'bold',
+    fontSize: 36,
+    fontWeight: '900',
   },
   levelText: {
-    fontSize: FontSize.sm,
+    fontSize: FontSize.xs,
     color: Colors.textSecondary,
     marginTop: Spacing.xs,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   rankRight: {
     flex: 1,
@@ -120,7 +133,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   progressBar: {
-    height: 8,
+    height: 6,
     backgroundColor: Colors.surfaceLight,
     borderRadius: BorderRadius.full,
     overflow: 'hidden',
@@ -148,23 +161,26 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: Spacing.xs,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   statValue: {
-    fontSize: FontSize.xl,
-    fontWeight: 'bold',
+    fontSize: FontSize.lg,
+    fontWeight: '700',
     color: Colors.primary,
   },
   statLabel: {
     fontSize: FontSize.xs,
-    color: Colors.textSecondary,
-    marginTop: Spacing.xs,
+    color: Colors.textMuted,
+    marginTop: Spacing.xxs,
+    textTransform: 'uppercase',
   },
   section: {
     marginBottom: Spacing.lg,
   },
   sectionTitle: {
-    fontSize: FontSize.lg,
-    fontWeight: 'bold',
+    fontSize: FontSize.xl,
+    fontWeight: '700',
     color: Colors.text,
     marginBottom: Spacing.xs,
   },
@@ -180,6 +196,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   rank: {
     fontSize: FontSize.md,
@@ -202,9 +220,11 @@ const styles = StyleSheet.create({
   friendRank: {
     fontSize: FontSize.xs,
     marginTop: Spacing.xs,
+    textTransform: 'uppercase',
   },
   friendVolume: {
     fontSize: FontSize.sm,
+    fontWeight: '600',
     color: Colors.textSecondary,
   },
 });
