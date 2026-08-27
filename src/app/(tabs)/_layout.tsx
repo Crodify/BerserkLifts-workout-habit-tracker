@@ -1,8 +1,6 @@
 import { Tabs } from 'expo-router';
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors, FontSize, BorderRadius } from '@/constants/theme';
-import { useStore } from '@/store';
-import { calculateLevelProgress } from '@/constants/rpg';
+import { Colors, FontSize } from '@/constants/theme';
 
 const TabIcon = ({ icon, label, focused }: { icon: string; label: string; focused: boolean }) => (
   <View style={[styles.tabItem, focused && styles.tabItemActive]}>
@@ -12,8 +10,6 @@ const TabIcon = ({ icon, label, focused }: { icon: string; label: string; focuse
 );
 
 export default function TabLayout() {
-  const profile = useStore((s) => s.profile);
-
   return (
     <Tabs
       screenOptions={{
@@ -21,6 +17,7 @@ export default function TabLayout() {
         tabBarStyle: styles.tabBar,
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textMuted,
+        tabBarShowLabel: false,
       }}
     >
       <Tabs.Screen
@@ -64,30 +61,36 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: Colors.background,
-    borderTopColor: Colors.border,
-    borderTopWidth: 1,
-    height: 80,
-    paddingBottom: 20,
-    paddingTop: 10,
+    backgroundColor: '#111111',
+    borderTopWidth: 0,
+    height: 70,
+    paddingBottom: 12,
+    paddingTop: 8,
+    elevation: 0,
+    shadowOpacity: 0,
   },
   tabItem: {
     alignItems: 'center',
     justifyContent: 'center',
+    width: 60,
+    paddingVertical: 6,
+    borderRadius: 12,
   },
   tabItemActive: {
-    // No background change, just icon color
+    backgroundColor: 'rgba(220, 38, 38, 0.15)',
   },
   tabIcon: {
-    fontSize: 24,
+    fontSize: 22,
     marginBottom: 4,
+    opacity: 0.5,
   },
   tabIconActive: {
-    // Could add a subtle effect
+    opacity: 1,
   },
   tabLabel: {
-    fontSize: FontSize.xs,
+    fontSize: 10,
     color: Colors.textMuted,
+    fontWeight: '500',
   },
   tabLabelActive: {
     color: Colors.primary,
