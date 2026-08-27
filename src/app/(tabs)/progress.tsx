@@ -4,7 +4,7 @@ import { useStore } from '@/store';
 import { formatDate, formatNumber } from '@/utils';
 
 export default function ProgressScreen() {
-  const { workouts, personalRecords, bodyMeasurements, profile } = useStore();
+  const { workouts, profile } = useStore();
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
