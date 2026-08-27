@@ -3,6 +3,7 @@ import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
 import { calculateLevelProgress, getRankColor } from '@/constants/rpg';
 import { formatNumber } from '@/utils';
+import { EmptyState } from '@/components/EmptyState';
 
 export default function DashboardScreen() {
   const { profile, friends } = useStore();
@@ -13,65 +14,86 @@ export default function DashboardScreen() {
     ...friends,
   ].sort((a, b) => b.totalVolume - a.totalVolume);
 
+  const hasData = profile.xp > 0 || profile.totalWorkouts > 0;
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.titlePrefix}>COMMAND CENTER</Text>
-        <Text style={styles.greeting}>DASHBOARD</Text>
-      </View>
-
-      <TouchableOpacity style={styles.rankCard} activeOpacity={0.8}>
-        <View style={styles.rankLeft}>
-          <Text style={[styles.rankLetter, { color: Colors.primary }]}>{profile.rank}</Text>
-          <Text style={styles.levelText}>LVL {profile.level}</Text>
-        </View>
-        <View style={styles.rankRight}>
-          <View style={styles.xpRow}>
-            <Text style={styles.xpText}>{formatNumber(profile.xp)}</Text>
-            <Text style={styles.xpLabel}> / XP</Text>
+      {!hasData ? (
+        <EmptyState
+          icon='?'
+          title='Welcome to BerserkLifts'
+          description='Complete your first workout to start your journey and begin leveling up your character.'
+          actionLabel='Start Training'
+        />
+      ) : (
+        <>
+          <View style={styles.headerContainer}>
+            <Text style={styles.titlePrefix}>COMMAND CENTER</Text>
+            <Text style={styles.greeting}>DASHBOARD</Text>
           </View>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: levelProgress + '%' }]} />
-          </View>
-          <Text style={styles.progressText}>{Math.round(levelProgress)}% COMPLETED</Text>
-        </View>
-      </TouchableOpacity>
 
-      <View style={styles.statsRow}>
-        <TouchableOpacity style={styles.statBox} activeOpacity={0.8}>
-          <Text style={styles.statValue}>{profile.totalWorkouts}</Text>
-          <Text style={styles.statLabel}>WORKOUTS</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.statBox} activeOpacity={0.8}>
-          <Text style={styles.statValue}>{formatNumber(profile.totalVolume)}<Text style={styles.unitText}>KG</Text></Text>
-          <Text style={styles.statLabel}>VOLUME</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.statBox} activeOpacity={0.8}>
-          <Text style={styles.statValue}>{profile.currentStreak}</Text>
-          <Text style={styles.statLabel}>STREAK</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>LEADERBOARD</Text>
-          <Text style={styles.sectionTag}>VOLUME</Text>
-        </View>
-        
-        {allFriends.map((friend, index) => (
-          <TouchableOpacity key={friend.id} style={[styles.leaderboardItem, friend.isUser && styles.leaderboardItemYou]} activeOpacity={0.8}>
-            <Text style={styles.rank}>#{index + 1}</Text>
-            <Text style={styles.friendAvatar}>{friend.avatar}</Text>
-            <View style={styles.friendInfo}>
-              <Text style={styles.friendName}>{friend.name.toUpperCase()}</Text>
-              <Text style={[styles.friendRank, { color: getRankColor(friend.rank) }]}>
-                RANK {friend.rank}
-              </Text>
+          <TouchableOpacity style={styles.rankCard} activeOpacity={0.8}>
+            <View style={styles.rankLeft}>
+              <Text style={[styles.rankLetter, { color: Colors.primary }]}>{profile.rank}</Text>
+              <Text style={styles.levelText}>LVL {profile.level}</Text>
             </View>
-            <Text style={styles.friendVolume}>{formatNumber(friend.totalVolume)} KG</Text>
+            <View style={styles.rankRight}>
+              <View style={styles.xpRow}>
+                <Text style={styles.xpText}>{formatNumber(profile.xp)}</Text>
+                <Text style={styles.xpLabel}> / XP</Text>
+              </View>
+              <View style={styles.progressBar}>
+                <View style={[styles.progressFill, { width: levelProgress + '%' }]} />
+              </View>
+              <Text style={styles.progressText}>{Math.round(levelProgress)}% COMPLETED</Text>
+            </View>
           </TouchableOpacity>
-        ))}
-      </View>
+
+          <View style={styles.statsRow}>
+            <TouchableOpacity style={styles.statBox} activeOpacity={0.8}>
+              <Text style={styles.statValue}>{profile.totalWorkouts}</Text>
+              <Text style={styles.statLabel}>WORKOUTS</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.statBox} activeOpacity={0.8}>
+              <Text style={styles.statValue}>{formatNumber(profile.totalVolume)}<Text style={styles.unitText}>KG</Text></Text>
+              <Text style={styles.statLabel}>VOLUME</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.statBox} activeOpacity={0.8}>
+              <Text style={styles.statValue}>{profile.currentStreak}</Text>
+              <Text style={styles.statLabel}>STREAK</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>LEADERBOARD</Text>
+              <Text style={styles.sectionTag}>VOLUME</Text>
+            </View>
+            
+            {allFriends.length === 0 ? (
+              <EmptyState
+                icon='??'
+                title='No Competitors Yet'
+                description='Add friends to compete and climb the leaderboard together.'
+              />
+            ) : (
+              allFriends.map((friend, index) => (
+                <TouchableOpacity key={friend.id} style={[styles.leaderboardItem, friend.isUser && styles.leaderboardItemYou]} activeOpacity={0.8}>
+                  <Text style={styles.rank}>#{index + 1}</Text>
+                  <Text style={styles.friendAvatar}>{friend.avatar}</Text>
+                  <View style={styles.friendInfo}>
+                    <Text style={styles.friendName}>{friend.name.toUpperCase()}</Text>
+                    <Text style={[styles.friendRank, { color: getRankColor(friend.rank) }]}>
+                      RANK {friend.rank}
+                    </Text>
+                  </View>
+                  <Text style={styles.friendVolume}>{formatNumber(friend.totalVolume)} KG</Text>
+                </TouchableOpacity>
+              ))
+            )}
+          </View>
+        </>
+      )}
     </ScrollView>
   );
 }
@@ -84,6 +106,7 @@ const styles = StyleSheet.create({
   content: {
     padding: Spacing.lg,
     paddingTop: 60,
+    minHeight: '100%',
   },
   headerContainer: {
     marginBottom: Spacing.lg,
