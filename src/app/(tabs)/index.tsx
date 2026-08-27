@@ -1,9 +1,38 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
 import { calculateLevelProgress, getRankColor } from '@/constants/rpg';
 import { formatNumber } from '@/utils';
 import { EmptyState } from '@/components/EmptyState';
+
+const FadeInView = ({ delay, children }: { delay: number; children: React.ReactNode }) => {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        delay,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 500,
+        delay,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  return (
+    <Animated.View style={[{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+      {children}
+    </Animated.View>
+  );
+};
 
 export default function DashboardScreen() {
   const { profile, friends } = useStore();
@@ -19,79 +48,89 @@ export default function DashboardScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {!hasData ? (
-        <EmptyState
-          icon='?'
-          title='Welcome to BerserkLifts'
-          description='Complete your first workout to start your journey and begin leveling up your character.'
-          actionLabel='Start Training'
-        />
+        <FadeInView delay={0}>
+          <EmptyState
+            icon='?'
+            title='Welcome to BerserkLifts'
+            description='Complete your first workout to start your journey and begin leveling up your character.'
+            actionLabel='Start Training'
+          />
+        </FadeInView>
       ) : (
         <>
-          <View style={styles.headerContainer}>
-            <Text style={styles.titlePrefix}>COMMAND CENTER</Text>
-            <Text style={styles.greeting}>DASHBOARD</Text>
-          </View>
-
-          <TouchableOpacity style={styles.rankCard} activeOpacity={0.8}>
-            <View style={styles.rankLeft}>
-              <Text style={[styles.rankLetter, { color: Colors.primary }]}>{profile.rank}</Text>
-              <Text style={styles.levelText}>LVL {profile.level}</Text>
+          <FadeInView delay={0}>
+            <View style={styles.headerContainer}>
+              <Text style={styles.titlePrefix}>COMMAND CENTER</Text>
+              <Text style={styles.greeting}>DASHBOARD</Text>
             </View>
-            <View style={styles.rankRight}>
-              <View style={styles.xpRow}>
-                <Text style={styles.xpText}>{formatNumber(profile.xp)}</Text>
-                <Text style={styles.xpLabel}> / XP</Text>
+          </FadeInView>
+
+          <FadeInView delay={100}>
+            <TouchableOpacity style={styles.rankCard} activeOpacity={0.8}>
+              <View style={styles.rankLeft}>
+                <Text style={[styles.rankLetter, { color: Colors.primary }]}>{profile.rank}</Text>
+                <Text style={styles.levelText}>LVL {profile.level}</Text>
               </View>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: levelProgress + '%' }]} />
+              <View style={styles.rankRight}>
+                <View style={styles.xpRow}>
+                  <Animated.Text style={styles.xpText}>{formatNumber(profile.xp)}</Animated.Text>
+                  <Text style={styles.xpLabel}> / XP</Text>
+                </View>
+                <View style={styles.progressBar}>
+                  <View style={[styles.progressFill, { width: levelProgress + '%' }]} />
+                </View>
+                <Text style={styles.progressText}>{Math.round(levelProgress)}% COMPLETED</Text>
               </View>
-              <Text style={styles.progressText}>{Math.round(levelProgress)}% COMPLETED</Text>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </FadeInView>
 
-          <View style={styles.statsRow}>
-            <TouchableOpacity style={styles.statBox} activeOpacity={0.8}>
-              <Text style={styles.statValue}>{profile.totalWorkouts}</Text>
-              <Text style={styles.statLabel}>WORKOUTS</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.statBox} activeOpacity={0.8}>
-              <Text style={styles.statValue}>{formatNumber(profile.totalVolume)}<Text style={styles.unitText}>KG</Text></Text>
-              <Text style={styles.statLabel}>VOLUME</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.statBox} activeOpacity={0.8}>
-              <Text style={styles.statValue}>{profile.currentStreak}</Text>
-              <Text style={styles.statLabel}>STREAK</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>LEADERBOARD</Text>
-              <Text style={styles.sectionTag}>VOLUME</Text>
+          <FadeInView delay={200}>
+            <View style={styles.statsRow}>
+              <TouchableOpacity style={styles.statBox} activeOpacity={0.8}>
+                <Text style={styles.statValue}>{profile.totalWorkouts}</Text>
+                <Text style={styles.statLabel}>WORKOUTS</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.statBox} activeOpacity={0.8}>
+                <Text style={styles.statValue}>{formatNumber(profile.totalVolume)}<Text style={styles.unitText}>KG</Text></Text>
+                <Text style={styles.statLabel}>VOLUME</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.statBox} activeOpacity={0.8}>
+                <Text style={styles.statValue}>{profile.currentStreak}</Text>
+                <Text style={styles.statLabel}>STREAK</Text>
+              </TouchableOpacity>
             </View>
-            
-            {allFriends.length === 0 ? (
-              <EmptyState
-                icon='??'
-                title='No Competitors Yet'
-                description='Add friends to compete and climb the leaderboard together.'
-              />
-            ) : (
-              allFriends.map((friend, index) => (
-                <TouchableOpacity key={friend.id} style={[styles.leaderboardItem, friend.isUser && styles.leaderboardItemYou]} activeOpacity={0.8}>
-                  <Text style={styles.rank}>#{index + 1}</Text>
-                  <Text style={styles.friendAvatar}>{friend.avatar}</Text>
-                  <View style={styles.friendInfo}>
-                    <Text style={styles.friendName}>{friend.name.toUpperCase()}</Text>
-                    <Text style={[styles.friendRank, { color: getRankColor(friend.rank) }]}>
-                      RANK {friend.rank}
-                    </Text>
-                  </View>
-                  <Text style={styles.friendVolume}>{formatNumber(friend.totalVolume)} KG</Text>
-                </TouchableOpacity>
-              ))
-            )}
-          </View>
+          </FadeInView>
+
+          <FadeInView delay={300}>
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>LEADERBOARD</Text>
+                <Text style={styles.sectionTag}>VOLUME</Text>
+              </View>
+              
+              {allFriends.length === 0 ? (
+                <EmptyState
+                  icon='??'
+                  title='No Competitors Yet'
+                  description='Add friends to compete and climb the leaderboard together.'
+                />
+              ) : (
+                allFriends.map((friend, index) => (
+                  <TouchableOpacity key={friend.id} style={[styles.leaderboardItem, friend.isUser && styles.leaderboardItemYou]} activeOpacity={0.8}>
+                    <Text style={styles.rank}>#{index + 1}</Text>
+                    <Text style={styles.friendAvatar}>{friend.avatar}</Text>
+                    <View style={styles.friendInfo}>
+                      <Text style={styles.friendName}>{friend.name.toUpperCase()}</Text>
+                      <Text style={[styles.friendRank, { color: getRankColor(friend.rank) }]}>
+                        RANK {friend.rank}
+                      </Text>
+                    </View>
+                    <Text style={styles.friendVolume}>{formatNumber(friend.totalVolume)} KG</Text>
+                  </TouchableOpacity>
+                ))
+              )}
+            </View>
+          </FadeInView>
         </>
       )}
     </ScrollView>
