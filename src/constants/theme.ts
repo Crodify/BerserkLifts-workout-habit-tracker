@@ -1,16 +1,25 @@
-export const Colors = {
-  background: '#0A0A0A',
-  surface: '#1A1A1A',
-  surfaceLight: '#252525',
-  primary: '#DC2626',
-  primaryDark: '#991B1B',
-  text: '#FFFFFF',
-  textSecondary: '#9CA3AF',
-  textMuted: '#6B7280',
-  success: '#22C55E',
+﻿export const Colors = {
+  // Professional Slate-Blue Palette
+  background: '#0F172A',      // Slate 900
+  surface: '#1E293B',        // Slate 800
+  surfaceLight: '#334155',   // Slate 700
+  
+  // Professional Brand
+  primary: '#38BDF8',        // Sky 400 (Clean, authoritative)
+  primaryDark: '#0284C7',    // Sky 600
+  
+  // Rich Accent
+  accent: '#F59E0B',         // Amber (Gold/Premium touch)
+  
+  success: '#10B981',        // Emerald
   warning: '#F59E0B',
   error: '#EF4444',
-  border: '#2D2D2D',
+  
+  text: '#F8FAFC',           // Slate 50
+  textSecondary: '#94A3B8',  // Slate 400
+  textMuted: '#64748B',      // Slate 500
+  
+  border: '#334155',         // Slate 700
   white: '#FFFFFF',
   black: '#000000',
 };
@@ -25,9 +34,9 @@ export const Spacing = {
 };
 
 export const BorderRadius = {
-  sm: 8,
-  md: 12,
-  lg: 16,
+  sm: 6,
+  md: 10,
+  lg: 16, // Professional rounded corner
   xl: 24,
   full: 9999,
 };
