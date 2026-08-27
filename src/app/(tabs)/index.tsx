@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
 import { calculateLevelProgress, getRankColor } from '@/constants/rpg';
@@ -20,7 +20,7 @@ export default function DashboardScreen() {
         <Text style={styles.greeting}>DASHBOARD</Text>
       </View>
 
-      <View style={styles.rankCard}>
+      <TouchableOpacity style={styles.rankCard} activeOpacity={0.8}>
         <View style={styles.rankLeft}>
           <Text style={[styles.rankLetter, { color: Colors.primary }]}>{profile.rank}</Text>
           <Text style={styles.levelText}>LVL {profile.level}</Text>
@@ -31,25 +31,25 @@ export default function DashboardScreen() {
             <Text style={styles.xpLabel}> / XP</Text>
           </View>
           <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: levelProgress + "%" }]} />
+            <View style={[styles.progressFill, { width: levelProgress + '%' }]} />
           </View>
           <Text style={styles.progressText}>{Math.round(levelProgress)}% COMPLETED</Text>
         </View>
-      </View>
+      </TouchableOpacity>
 
       <View style={styles.statsRow}>
-        <View style={styles.statBox}>
+        <TouchableOpacity style={styles.statBox} activeOpacity={0.8}>
           <Text style={styles.statValue}>{profile.totalWorkouts}</Text>
           <Text style={styles.statLabel}>WORKOUTS</Text>
-        </View>
-        <View style={styles.statBox}>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.statBox} activeOpacity={0.8}>
           <Text style={styles.statValue}>{formatNumber(profile.totalVolume)}<Text style={styles.unitText}>KG</Text></Text>
           <Text style={styles.statLabel}>VOLUME</Text>
-        </View>
-        <View style={styles.statBox}>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.statBox} activeOpacity={0.8}>
           <Text style={styles.statValue}>{profile.currentStreak}</Text>
           <Text style={styles.statLabel}>STREAK</Text>
-        </View>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.section}>
@@ -59,7 +59,7 @@ export default function DashboardScreen() {
         </View>
         
         {allFriends.map((friend, index) => (
-          <View key={friend.id} style={styles.leaderboardItem}>
+          <TouchableOpacity key={friend.id} style={[styles.leaderboardItem, friend.isUser && styles.leaderboardItemYou]} activeOpacity={0.8}>
             <Text style={styles.rank}>#{index + 1}</Text>
             <Text style={styles.friendAvatar}>{friend.avatar}</Text>
             <View style={styles.friendInfo}>
@@ -69,7 +69,7 @@ export default function DashboardScreen() {
               </Text>
             </View>
             <Text style={styles.friendVolume}>{formatNumber(friend.totalVolume)} KG</Text>
-          </View>
+          </TouchableOpacity>
         ))}
       </View>
     </ScrollView>
@@ -153,10 +153,11 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
   progressBar: {
-    height: 6,
+    height: 10,
     backgroundColor: Colors.surfaceLight,
     borderRadius: BorderRadius.full,
     overflow: 'hidden',
+    marginBottom: Spacing.xs,
   },
   progressFill: {
     height: '100%',
@@ -168,7 +169,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: Colors.textMuted,
     textAlign: 'right',
-    marginTop: Spacing.xs,
     letterSpacing: 0.5,
   },
   statsRow: {
@@ -238,6 +238,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
+  leaderboardItemYou: {
+    backgroundColor: 'rgba(255, 26, 60, 0.15)',
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.primary,
+  },
   rank: {
     fontSize: FontSize.sm,
     fontWeight: '900',
@@ -269,6 +274,3 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
 });
-
-
-
