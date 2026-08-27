@@ -1,194 +1,102 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
-import { MuscleHeatmap } from '@/components/MuscleHeatmap';
-import { VolumeChart } from '@/components/VolumeChart';
-import { PRBadge } from '@/components/PRBadge';
-import { ExerciseStatus } from '@/components/ExerciseStatus';
-import { LogWorkoutFlow } from '@/components/LogWorkoutFlow';
-import { calculateMuscleVolumes } from '@/utils/volumeCalc';
-import { getExerciseStatus } from '@/utils/prDetection';
-import { MuscleGroup } from '@/utils/muscleMapping';
+import { FolderCard } from '@/components/FolderCard';
+import { RoutineCard } from '@/components/RoutineCard';
+import { CreateFolderModal } from '@/components/CreateFolderModal';
+import { CreateRoutineModal } from '@/components/CreateRoutineModal';
 
 export default function WorkoutsScreen() {
-  const { workouts, exercises, personalRecords, profile } = useStore();
-  const [logWorkoutVisible, setLogWorkoutVisible] = useState(false);
-  const [selectedMuscle, setSelectedMuscle] = useState<MuscleGroup | null>(null);
+  const { routines, folders, exercises, activeWorkout, startWorkout, addRoutine, addFolder, deleteRoutine, deleteFolder } = useStore();
+  const [showCF, setShowCF] = useState(false);
+  const [showCR, setShowCR] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
-  const muscleVolumes = useMemo(() => {
-    return calculateMuscleVolumes(workouts, exercises);
-  }, [workouts, exercises]);
-
-  const weeklyVolume = useMemo(() => {
-    const last7Days = [];
-    const today = new Date();
-    
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-      
-      const dayWorkouts = workouts.filter(w => w.date === dateStr);
-      const volume = dayWorkouts.reduce((sum, w) => sum + w.totalVolume, 0);
-      
-      last7Days.push({
-        label: date.toLocaleDateString('en', { weekday: 'short' }),
-        value: volume,
-      });
-    }
-    
-    return last7Days;
-  }, [workouts]);
-
-  const recentExercises = useMemo(() => {
-    const exerciseMap = new Map();
-    
-    workouts
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 10)
-      .forEach(workout => {
-        workout.exercises.forEach(we => {
-          const exercise = exercises.find(e => e.id === we.exerciseId);
-          if (!exercise) return;
-          
-          if (!exerciseMap.has(exercise.id)) {
-            const exercisePRs = personalRecords.filter(pr => pr.exerciseId === exercise.id);
-            const status = getExerciseStatus(exercise.id, workouts);
-            
-            exerciseMap.set(exercise.id, {
-              name: exercise.name,
-              lastWorkout: workout.date,
-              prs: exercisePRs,
-              status,
-            });
-          }
-        });
-      });
-    
-    return Array.from(exerciseMap.values()).slice(0, 5);
-  }, [workouts, exercises, personalRecords]);
-
-  const handleMusclePress = (muscle: MuscleGroup) => {
-    setSelectedMuscle(muscle);
-  };
+  const inFolders = folders.map(f => ({ folder: f, routines: routines.filter(r => r.folderId === f.id) }));
+  const unfiled = routines.filter(r => !r.folderId);
 
   return (
-    <View style={styles.mainContainer}>
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.titlePrefix}>ANALYTICS</Text>
-          <Text style={styles.greeting}>WORKOUTS</Text>
+    <View style={st.m}>
+      <ScrollView style={st.s} contentContainerStyle={st.c}>
+        <View style={st.h}>
+          <Text style={st.p}>TRAINING</Text>
+          <Text style={st.t}>WORKOUTS</Text>
         </View>
-
-        <View style={styles.section}>
-          <MuscleHeatmap 
-            muscleVolumes={muscleVolumes} 
-            onMusclePress={handleMusclePress}
-          />
-        </View>
-
-        <View style={styles.section}>
-          <VolumeChart
-            data={weeklyVolume}
-            title="THIS WEEK"
-            subtitle="Daily volume in KG"
-          />
-        </View>
-
-        <View style={styles.statsRow}>
-          <View style={styles.statBox}>
-            <Text style={styles.statValue}>{profile.totalWorkouts}</Text>
-            <Text style={styles.statLabel}>TOTAL</Text>
+        <TouchableOpacity style={st.eb} onPress={() => startWorkout('Quick Workout')} activeOpacity={0.7}>
+          <Text style={st.ei}>\u26A1</Text>
+          <View style={st.ebf}><Text style={st.ebt}>START EMPTY WORKOUT</Text><Text style={st.ebs}>Begin training without a template</Text></View>
+          <Text style={st.ar}>\u2192</Text>
+        </TouchableOpacity>
+        {activeWorkout && (
+          <TouchableOpacity style={st.ab}>
+            <View style={st.ad} />
+            <Text style={st.at}>ACTIVE: {activeWorkout.name}</Text>
+          </TouchableOpacity>
+        )}
+        {inFolders.map(({ folder, routines: fr }) => (
+          <FolderCard key={folder.id} folder={folder} routines={fr} exercises={exercises} onStartRoutine={(rid) => { startWorkout(undefined, rid); }} onDeleteFolder={() => deleteFolder(folder.id)} onDeleteRoutine={(id) => deleteRoutine(id)} />
+        ))}
+        {unfiled.length > 0 && (
+          <View style={st.sec}>
+            <Text style={st.st}>ROUTINES</Text>
+            {unfiled.map(r => (
+              <RoutineCard key={r.id} routine={r} exercises={exercises} onStart={() => startWorkout(undefined, r.id)} onDelete={() => deleteRoutine(r.id)} />
+            ))}
           </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statValue}>{profile.currentStreak}</Text>
-            <Text style={styles.statLabel}>STREAK</Text>
+        )}
+        {routines.length === 0 && (
+          <View style={st.em}>
+            <Text style={st.emI}>\uD83D\uDCCB</Text>
+            <Text style={st.emT}>NO ROUTINES YET</Text>
+            <Text style={st.emX}>Create your first routine to quickly start workouts.</Text>
           </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statValue}>{profile.totalPRs}</Text>
-            <Text style={styles.statLabel}>PRs</Text>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>RECENT EXERCISES</Text>
-          {recentExercises.map((exercise, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.exerciseCard}
-              activeOpacity={0.7}
-            >
-              <View style={styles.exerciseHeader}>
-                <Text style={styles.exerciseName}>{exercise.name}</Text>
-                <ExerciseStatus 
-                  status={exercise.status.status}
-                  trend={exercise.status.trend}
-                  sessions={exercise.status.sessions}
-                />
-              </View>
-              
-              {exercise.prs.length > 0 && (
-                <View style={styles.prRow}>
-                  {exercise.prs.slice(0, 3).map((pr, prIndex) => (
-                    <PRBadge
-                      key={prIndex}
-                      type={pr.type === '1rm' ? '1rm' : pr.type === 'maxVolume' ? 'volume' : 'reps'}
-                      value={`${pr.value}${pr.type === '1rm' ? ' KG' : ''}`}
-                      compact
-                    />
-                  ))}
-                </View>
-              )}
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        <View style={{ height: 100 }} />
+        )}
+        <View style={{ height: 120 }} />
       </ScrollView>
-
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => setLogWorkoutVisible(true)}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.fabIcon}>⚡</Text>
-        <Text style={styles.fabText}>LOG</Text>
-      </TouchableOpacity>
-
-      <Modal
-        visible={logWorkoutVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setLogWorkoutVisible(false)}
-      >
-        <LogWorkoutFlow
-          visible={logWorkoutVisible}
-          onClose={() => setLogWorkoutVisible(false)}
-        />
-      </Modal>
+      <View style={st.fw}>
+        <TouchableOpacity style={st.fb} onPress={() => setShowMenu(!showMenu)} activeOpacity={0.8}>
+          <Text style={st.fi}>+</Text>
+        </TouchableOpacity>
+        {showMenu && (
+          <View style={st.fm}>
+            <TouchableOpacity style={st.fmi} onPress={() => { setShowMenu(false); setShowCR(true); }}><Text style={st.fmt}>New Routine</Text></TouchableOpacity>
+            <TouchableOpacity style={st.fmi} onPress={() => { setShowMenu(false); setShowCF(true); }}><Text style={st.fmt}>New Folder</Text></TouchableOpacity>
+          </View>
+        )}
+      </View>
+      <CreateFolderModal visible={showCF} onClose={() => setShowCF(false)} onCreate={(n, c) => addFolder(n, c)} />
+      <CreateRoutineModal visible={showCR} onClose={() => setShowCR(false)} onCreate={(n, el, fid) => addRoutine({ name: n, exercises: el, folderId: fid })} exercises={exercises} folders={folders} />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  mainContainer: { flex: 1, backgroundColor: Colors.background },
-  container: { flex: 1, backgroundColor: Colors.background },
-  content: { padding: Spacing.lg, paddingTop: 60 },
-  headerContainer: { marginBottom: Spacing.lg },
-  titlePrefix: { fontSize: 10, fontWeight: '800', color: Colors.primary, letterSpacing: 2, marginBottom: 2 },
-  greeting: { fontSize: FontSize.title, fontWeight: '900', color: Colors.text, letterSpacing: 1 },
-  section: { marginBottom: Spacing.lg },
-  sectionTitle: { fontSize: FontSize.md, fontWeight: '900', color: Colors.text, letterSpacing: 1, marginBottom: Spacing.md },
-  statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.xl, gap: Spacing.sm },
-  statBox: { flex: 1, backgroundColor: Colors.surface, borderRadius: BorderRadius.md, padding: Spacing.md, alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
-  statValue: { fontSize: FontSize.xl, fontWeight: '900', color: Colors.primary, marginBottom: Spacing.xs },
-  statLabel: { fontSize: 9, fontWeight: '800', color: Colors.textMuted, letterSpacing: 1 },
-  exerciseCard: { backgroundColor: Colors.surface, borderRadius: BorderRadius.md, padding: Spacing.md, marginBottom: Spacing.sm, borderWidth: 1, borderColor: Colors.border },
-  exerciseHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: Spacing.sm },
-  exerciseName: { fontSize: FontSize.md, fontWeight: '800', color: Colors.text, flex: 1 },
-  prRow: { flexDirection: 'row', gap: Spacing.xs, flexWrap: 'wrap' },
-  fab: { position: 'absolute', bottom: 30, right: 30, backgroundColor: Colors.primary, borderRadius: 60, width: 70, height: 70, justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: 4, shadowColor: Colors.black, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
-  fabIcon: { fontSize: 28 },
-  fabText: { fontSize: 10, fontWeight: '900', color: Colors.white, letterSpacing: 1 },
+const st = StyleSheet.create({
+  m: { flex: 1, backgroundColor: Colors.background },
+  s: { flex: 1 },
+  c: { padding: Spacing.lg, paddingTop: 60 },
+  h: { marginBottom: Spacing.lg },
+  p: { fontSize: 10, fontWeight: '800', color: Colors.primary, letterSpacing: 2, marginBottom: 2 },
+  t: { fontSize: FontSize.title, fontWeight: '900', color: Colors.text, letterSpacing: 1 },
+  eb: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surface, borderRadius: BorderRadius.lg, padding: Spacing.md, marginBottom: Spacing.lg, borderWidth: 1, borderColor: Colors.border, borderLeftWidth: 4, borderLeftColor: Colors.primary },
+  ei: { fontSize: 28, marginRight: Spacing.md },
+  ebf: { flex: 1 },
+  ebt: { fontSize: FontSize.sm, fontWeight: '900', color: Colors.text, letterSpacing: 1 },
+  ebs: { fontSize: FontSize.xs, color: Colors.textMuted, marginTop: 2 },
+  ar: { fontSize: 18, color: Colors.primary, fontWeight: '800' },
+  ab: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(34, 197, 94, 0.15)', borderRadius: BorderRadius.md, padding: Spacing.md, marginBottom: Spacing.lg, borderWidth: 1, borderColor: '#22C55E' },
+  ad: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22C55E', marginRight: Spacing.sm },
+  at: { flex: 1, fontSize: FontSize.xs, fontWeight: '800', color: '#22C55E', letterSpacing: 0.5 },
+  sec: { marginBottom: Spacing.lg },
+  st: { fontSize: FontSize.sm, fontWeight: '900', color: Colors.textMuted, letterSpacing: 1, marginBottom: Spacing.md },
+  em: { alignItems: 'center', paddingVertical: Spacing.xxl },
+  emI: { fontSize: 48, marginBottom: Spacing.md },
+  emT: { fontSize: FontSize.lg, fontWeight: '900', color: Colors.text, letterSpacing: 1, marginBottom: Spacing.sm },
+  emX: { fontSize: FontSize.sm, color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
+  fw: { position: 'absolute', bottom: 30, right: 30, alignItems: 'flex-end' },
+  fb: { backgroundColor: Colors.primary, borderRadius: 35, width: 60, height: 60, justifyContent: 'center', alignItems: 'center', elevation: 8 },
+  fi: { fontSize: 28, color: Colors.white, fontWeight: '300', marginTop: -2 },
+  fm: { position: 'absolute', bottom: 70, right: 0, backgroundColor: Colors.surface, borderRadius: BorderRadius.lg, padding: Spacing.sm, borderWidth: 1, borderColor: Colors.border, minWidth: 180 },
+  fmi: { flexDirection: 'row', alignItems: 'center', padding: Spacing.md, borderRadius: BorderRadius.md },
+  fmt: { fontSize: FontSize.sm, fontWeight: '700', color: Colors.text },
 });
