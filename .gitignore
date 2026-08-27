@@ -3,6 +3,8 @@ node_modules/
 dist/
 *.lock
 .env
-.agents/
 .gstack/
 
+
+# Agency Agents (reference only)
+.agency-agents/
