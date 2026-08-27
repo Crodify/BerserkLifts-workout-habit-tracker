@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import { AppState, Workout, Routine, Habit, BodyMeasurement, Friend } from '@/types';
 import { calculateLevel, calculateRank } from '@/constants/rpg';
 import { generateId } from '@/utils';
@@ -36,135 +36,100 @@ const defaultFriends: Friend[] = [
   { id: '3', name: 'Casca', avatar: '🛡️', xp: 5200, rank: 'C', totalVolume: 78000 },
 ];
 
+// XP Calculation: sets * reps * (weight / 10 + 5)
+const calculateWorkoutXP = (sets: number, reps: number, weight: number): number => {
+  const baseXP = sets * reps * Math.max(1, weight / 10 + 5);
+  return Math.round(baseXP);
+};
+
 export const useStore = create<AppState>((set, get) => ({
   profile: defaultProfile,
   workouts: [],
-  routines: [
-    {
-      id: '1',
-      name: 'Push Day',
-      exercises: [
-        { exerciseId: '1', targetSets: 4, targetReps: 8 },
-        { exerciseId: '4', targetSets: 4, targetReps: 10 },
-        { exerciseId: '8', targetSets: 3, targetReps: 12 },
-      ],
-      folderId: null,
-    },
-    {
-      id: '2',
-      name: 'Pull Day',
-      exercises: [
-        { exerciseId: '3', targetSets: 4, targetReps: 6 },
-        { exerciseId: '5', targetSets: 4, targetReps: 8 },
-        { exerciseId: '6', targetSets: 3, targetReps: 10 },
-      ],
-      folderId: null,
-    },
-    {
-      id: '3',
-      name: 'Leg Day',
-      exercises: [
-        { exerciseId: '2', targetSets: 4, targetReps: 8 },
-        { exerciseId: '9', targetSets: 4, targetReps: 12 },
-        { exerciseId: '10', targetSets: 3, targetReps: 12 },
-      ],
-      folderId: null,
-    },
-  ],
-  folders: [],
-  habits: [
-    { id: '1', name: 'Drink Water', icon: '💧', completedDates: [], streak: 0 },
-    { id: '2', name: 'Sleep 8 Hours', icon: '😴', completedDates: [], streak: 0 },
-    { id: '3', name: 'Stretch', icon: '🧘', completedDates: [], streak: 0 },
-  ],
+  routines: [],
+  habits: [],
   exercises: defaultExercises,
-  personalRecords: [],
-  bodyMeasurements: [],
   friends: defaultFriends,
+  bodyMeasurements: [],
 
-  addWorkout: (workout) => {
+  logWorkout: (exercise: { exerciseName: string; sets: number; reps: number; weight: number }) => {
+    const { profile } = get();
+    const xpGained = calculateWorkoutXP(exercise.sets, exercise.reps, exercise.weight);
+    const newXP = profile.xp + xpGained;
+    const newLevel = calculateLevel(newXP);
+    const leveledUp = newLevel > profile.level;
+    const newRank = calculateRank(newLevel);
+
     const newWorkout: Workout = {
-      ...workout,
       id: generateId(),
+      exerciseName: exercise.exerciseName,
+      sets: exercise.sets,
+      reps: exercise.reps,
+      weight: exercise.weight,
       date: new Date().toISOString(),
+      xpGained,
     };
+
     set((state) => ({
-      workouts: [newWorkout, ...state.workouts],
       profile: {
         ...state.profile,
+        xp: newXP,
+        level: newLevel,
+        rank: newRank,
         totalWorkouts: state.profile.totalWorkouts + 1,
-        totalVolume: state.profile.totalVolume + newWorkout.totalVolume,
+        totalVolume: state.profile.totalVolume + exercise.weight * exercise.sets * exercise.reps,
+      },
+      workouts: [newWorkout, ...state.workouts],
+    }));
+
+    return { xpGained, leveledUp, newLevel };
+  },
+
+  addHabit: (name: string) => {
+    const newHabit: Habit = {
+      id: generateId(),
+      name,
+      icon: '✓',
+      completed: false,
+      completedDates: [],
+    };
+    set((state) => ({ habits: [newHabit, ...state.habits] }));
+  },
+
+  toggleHabit: (habitId: string) => {
+    const today = new Date().toISOString().split('T')[0];
+    set((state) => ({
+      habits: state.habits.map((h) =>
+        h.id === habitId
+          ? {
+              ...h,
+              completed: !h.completed,
+              completedDates: h.completed
+                ? h.completedDates.filter((d) => d !== today)
+                : [...h.completedDates, today],
+            }
+          : h
+      ),
+    }));
+  },
+
+  completeHabit: (habitId: string) => {
+    const { profile } = get();
+    const xpReward = 50;
+    const newXP = profile.xp + xpReward;
+    const newLevel = calculateLevel(newXP);
+    const leveledUp = newLevel > profile.level;
+    const newRank = calculateRank(newLevel);
+
+    set((state) => ({
+      profile: {
+        ...state.profile,
+        xp: newXP,
+        level: newLevel,
+        rank: newRank,
       },
     }));
-    get().addXP(Math.floor(newWorkout.totalVolume / 1000) * 10);
-  },
 
-  addRoutine: (routine) => {
-    const newRoutine: Routine = {
-      ...routine,
-      id: generateId(),
-    };
-    set((state) => ({
-      routines: [...state.routines, newRoutine],
-    }));
-  },
-
-  deleteRoutine: (id) => {
-    set((state) => ({
-      routines: state.routines.filter((r) => r.id !== id),
-    }));
-  },
-
-  addHabit: (habit) => {
-    const newHabit: Habit = {
-      ...habit,
-      id: generateId(),
-      completedDates: [],
-      streak: 0,
-    };
-    set((state) => ({
-      habits: [...state.habits, newHabit],
-    }));
-  },
-
-  toggleHabit: (habitId, date) => {
-    set((state) => ({
-      habits: state.habits.map((h) => {
-        if (h.id !== habitId) return h;
-        const completed = h.completedDates.includes(date);
-        const newDates = completed
-          ? h.completedDates.filter((d) => d !== date)
-          : [...h.completedDates, date];
-        return { ...h, completedDates: newDates };
-      }),
-    }));
-  },
-
-  deleteHabit: (id) => {
-    set((state) => ({
-      habits: state.habits.filter((h) => h.id !== id),
-    }));
-  },
-
-  addBodyMeasurement: (measurement) => {
-    set((state) => ({
-      bodyMeasurements: [...state.bodyMeasurements, measurement],
-    }));
-  },
-
-  addXP: (amount) => {
-    set((state) => {
-      const newXP = state.profile.xp + amount;
-      const newLevel = calculateLevel(newXP);
-      const newRank = calculateRank(newLevel);
-      return {
-        profile: {
-          ...state.profile,
-          xp: newXP,
-          level: newLevel,
-          rank: newRank,
-        },
-      };
-    });
+    get().toggleHabit(habitId);
+    return { xpGained: xpReward, leveledUp, newLevel };
   },
 }));
