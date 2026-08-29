@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal } from 'react-native';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Animated } from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
 import { ExercisePickerModal } from './ExercisePickerModal';
@@ -11,12 +11,25 @@ function formatTimer(seconds: number) {
   return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`;
 }
 
+function formatRest(seconds: number) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
 export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
-  const { activeWorkout, toggleSetComplete, addSetToExercise, updateSet, addExerciseToWorkout, removeExerciseFromWorkout, completeWorkout, cancelWorkout } = useStore();
+  const { activeWorkout, settings, toggleSetComplete, addSetToExercise, updateSet, addExerciseToWorkout, removeExerciseFromWorkout, completeWorkout, cancelWorkout } = useStore();
   const [elapsed, setElapsed] = useState(0);
   const [showPicker, setShowPicker] = useState(false);
   const [showFinish, setShowFinish] = useState(false);
 
+  // Rest timer state
+  const [restRemaining, setRestRemaining] = useState(0);
+  const [restActive, setRestActive] = useState(false);
+  const restIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const restProgress = useRef(new Animated.Value(0)).current;
+
+  // Workout timer
   useEffect(() => {
     if (!activeWorkout) return;
     const start = new Date(activeWorkout.startTime).getTime();
@@ -25,6 +38,65 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [activeWorkout?.startTime]);
+
+  // Cleanup rest timer on unmount
+  useEffect(() => {
+    return () => {
+      if (restIntervalRef.current) clearInterval(restIntervalRef.current);
+    };
+  }, []);
+
+  const dismissRestTimer = useCallback(() => {
+    if (restIntervalRef.current) {
+      clearInterval(restIntervalRef.current);
+      restIntervalRef.current = null;
+    }
+    setRestActive(false);
+    setRestRemaining(0);
+    restProgress.setValue(0);
+  }, [restProgress]);
+
+  const startRestTimer = useCallback((seconds: number) => {
+    dismissRestTimer();
+    setRestRemaining(seconds);
+    setRestActive(true);
+    restProgress.setValue(1);
+
+    // Animate progress bar from 1 to 0
+    Animated.timing(restProgress, {
+      toValue: 0,
+      duration: seconds * 1000,
+      useNativeDriver: false,
+    }).start();
+
+    restIntervalRef.current = setInterval(() => {
+      setRestRemaining(prev => {
+        if (prev <= 1) {
+          if (restIntervalRef.current) clearInterval(restIntervalRef.current);
+          restIntervalRef.current = null;
+          setRestActive(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, [dismissRestTimer, restProgress]);
+
+  const handleToggleSet = useCallback((exerciseId: string, setId: string) => {
+    const exercise = activeWorkout?.exercises.find(e => e.id === exerciseId);
+    const set = exercise?.sets.find(s => s.id === setId);
+    const wasCompleted = set?.completed;
+
+    toggleSetComplete(exerciseId, setId);
+
+    // If completing a set (not uncompleting) and auto rest timer is on
+    if (!wasCompleted && settings.autoStartRestTimer) {
+      const restSeconds = set?.restTimer || settings.defaultRestTimer;
+      startRestTimer(restSeconds);
+    } else {
+      dismissRestTimer();
+    }
+  }, [activeWorkout, settings, toggleSetComplete, startRestTimer, dismissRestTimer]);
 
   if (!activeWorkout) return null;
 
@@ -35,19 +107,27 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
   const totalSets = activeWorkout.exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
 
   const handleFinish = () => {
+    dismissRestTimer();
     completeWorkout();
     setShowFinish(false);
     onFinish();
   };
 
   const handleDiscard = () => {
+    dismissRestTimer();
     cancelWorkout();
     setShowFinish(false);
     onFinish();
   };
 
+  const progressWidth = restProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
+
   return (
     <View style={s.container}>
+      {/* Header */}
       <View style={s.header}>
         <TouchableOpacity onPress={() => setShowFinish(true)}>
           <Text style={s.cancelBtn}>✕</Text>
@@ -95,7 +175,7 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
                 />
                 <TouchableOpacity
                   style={[s.checkBtn, set.completed && s.checkDone]}
-                  onPress={() => toggleSetComplete(ex.id, set.id)}
+                  onPress={() => handleToggleSet(ex.id, set.id)}
                 >
                   <Text style={s.checkTxt}>{set.completed ? '✓' : ''}</Text>
                 </TouchableOpacity>
@@ -114,17 +194,36 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
         <TouchableOpacity style={s.addExBtn} onPress={() => setShowPicker(true)}>
           <Text style={s.addExTxt}>+ ADD EXERCISE</Text>
         </TouchableOpacity>
-        <View style={{ height: 100 }} />
+        <View style={{ height: restActive ? 160 : 100 }} />
       </ScrollView>
 
+      {/* Finish Button */}
       <View style={s.footer}>
         <TouchableOpacity style={s.finishBtn} onPress={() => setShowFinish(true)}>
           <Text style={s.finishTxt}>FINISH WORKOUT</Text>
         </TouchableOpacity>
       </View>
 
+      {/* Rest Timer Overlay */}
+      {restActive && (
+        <View style={s.restOverlay}>
+          <View style={s.restCard}>
+            <Text style={s.restLabel}>REST</Text>
+            <Text style={s.restTime}>{formatRest(restRemaining)}</Text>
+            <View style={s.restProgressTrack}>
+              <Animated.View style={[s.restProgressFill, { width: progressWidth }]} />
+            </View>
+            <TouchableOpacity style={s.restSkipBtn} onPress={dismissRestTimer}>
+              <Text style={s.restSkipTxt}>SKIP</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {/* Exercise Picker */}
       <ExercisePickerModal visible={showPicker} onClose={() => setShowPicker(false)} onSelect={(eid) => { addExerciseToWorkout(eid); setShowPicker(false); }} />
 
+      {/* Finish Confirm */}
       <Modal visible={showFinish} transparent animationType="fade" onRequestClose={() => setShowFinish(false)}>
         <View style={s.modal}>
           <View style={s.modalBox}>
@@ -181,6 +280,18 @@ const s = StyleSheet.create({
   footer: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: Spacing.lg, paddingBottom: 40, backgroundColor: Colors.background, borderTopWidth: 1, borderTopColor: Colors.border },
   finishBtn: { backgroundColor: Colors.primary, borderRadius: BorderRadius.md, paddingVertical: Spacing.md, alignItems: 'center' },
   finishTxt: { fontSize: FontSize.md, fontWeight: '900', color: Colors.white, letterSpacing: 1 },
+
+  // Rest Timer
+  restOverlay: { position: 'absolute', bottom: 80, left: 0, right: 0, paddingHorizontal: Spacing.lg, zIndex: 10 },
+  restCard: { backgroundColor: Colors.surface, borderRadius: BorderRadius.xl, padding: Spacing.lg, alignItems: 'center', borderWidth: 2, borderColor: Colors.info, shadowColor: Colors.info, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 8 },
+  restLabel: { fontSize: FontSize.xs, fontWeight: '900', color: Colors.info, letterSpacing: 3, marginBottom: Spacing.xs },
+  restTime: { fontSize: 56, fontWeight: '900', color: Colors.text, fontVariant: ['tabular-nums'], marginBottom: Spacing.md },
+  restProgressTrack: { width: '100%', height: 6, backgroundColor: Colors.surfaceLight, borderRadius: 3, overflow: 'hidden', marginBottom: Spacing.md },
+  restProgressFill: { height: '100%', backgroundColor: Colors.info, borderRadius: 3 },
+  restSkipBtn: { backgroundColor: Colors.surfaceLight, paddingHorizontal: Spacing.xl, paddingVertical: Spacing.sm, borderRadius: BorderRadius.sm, borderWidth: 1, borderColor: Colors.border },
+  restSkipTxt: { fontSize: FontSize.sm, fontWeight: '900', color: Colors.text, letterSpacing: 1 },
+
+  // Modals
   modal: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: Spacing.lg },
   modalBox: { backgroundColor: Colors.surface, borderRadius: BorderRadius.xl, padding: Spacing.lg, width: '100%', maxWidth: 360, borderWidth: 1, borderColor: Colors.border },
   modalTitle: { fontSize: FontSize.xl, fontWeight: '900', color: Colors.text, textAlign: 'center', marginBottom: Spacing.xs },
