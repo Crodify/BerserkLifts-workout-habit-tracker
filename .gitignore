@@ -4,7 +4,11 @@ dist/
 *.lock
 .env
 .gstack/
+.freebuff/
+.commit-msg.txt
 
+# Reference images
+Hevyrefimage/
 
 # Agency Agents (reference only)
 .agency-agents/
