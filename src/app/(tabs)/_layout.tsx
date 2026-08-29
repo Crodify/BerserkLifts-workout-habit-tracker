@@ -1,34 +1,24 @@
 import { Tabs } from 'expo-router';
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/theme';
-
-const EMOJI_ICONS: Record<string, { active: string; inactive: string }> = {
-  dashboard: { active: '📊', inactive: '📋' },
-  workouts: { active: '🏋️', inactive: '💪' },
-  habits: { active: '✅', inactive: '☑️' },
-  progress: { active: '📈', inactive: '📉' },
-  profile: { active: '👤', inactive: '👥' },
-};
+import { DashboardIcon, WorkoutIcon, HabitIcon, ProgressIcon, ProfileIcon } from '@/components/TabIcons';
 
 const TabIcon = ({
-  tab,
+  IconComponent,
   label,
   focused
 }: {
-  tab: string;
+  IconComponent: React.ComponentType<{ focused: boolean; size: number }>;
   label: string;
   focused: boolean;
-}) => {
-  const icons = EMOJI_ICONS[tab];
-  return (
-    <View style={[styles.tabItem, focused && styles.tabItemActive]}>
-      <Text style={styles.tabEmoji}>{focused ? icons.active : icons.inactive}</Text>
-      <Text style={[styles.tabLabel, focused && styles.tabLabelActive]}>
-        {label}
-      </Text>
-    </View>
-  );
-};
+}) => (
+  <View style={[styles.tabItem, focused && styles.tabItemActive]}>
+    <IconComponent focused={focused} size={24} />
+    <Text style={[styles.tabLabel, focused && styles.tabLabelActive]}>
+      {label}
+    </Text>
+  </View>
+);
 
 export default function TabLayout() {
   return (
@@ -44,7 +34,7 @@ export default function TabLayout() {
         options={{
           title: '',
           tabBarIcon: ({ focused }) => (
-            <TabIcon tab="dashboard" label="Dashboard" focused={focused} />
+            <TabIcon IconComponent={DashboardIcon} label="Dashboard" focused={focused} />
           ),
         }}
       />
@@ -53,7 +43,7 @@ export default function TabLayout() {
         options={{
           title: '',
           tabBarIcon: ({ focused }) => (
-            <TabIcon tab="workouts" label="Workouts" focused={focused} />
+            <TabIcon IconComponent={WorkoutIcon} label="Workouts" focused={focused} />
           ),
         }}
       />
@@ -62,7 +52,7 @@ export default function TabLayout() {
         options={{
           title: '',
           tabBarIcon: ({ focused }) => (
-            <TabIcon tab="habits" label="Habits" focused={focused} />
+            <TabIcon IconComponent={HabitIcon} label="Habits" focused={focused} />
           ),
         }}
       />
@@ -71,7 +61,7 @@ export default function TabLayout() {
         options={{
           title: '',
           tabBarIcon: ({ focused }) => (
-            <TabIcon tab="progress" label="Progress" focused={focused} />
+            <TabIcon IconComponent={ProgressIcon} label="Progress" focused={focused} />
           ),
         }}
       />
@@ -80,7 +70,7 @@ export default function TabLayout() {
         options={{
           title: '',
           tabBarIcon: ({ focused }) => (
-            <TabIcon tab="profile" label="Profile" focused={focused} />
+            <TabIcon IconComponent={ProfileIcon} label="Profile" focused={focused} />
           ),
         }}
       />
@@ -107,9 +97,6 @@ const styles = StyleSheet.create({
   },
   tabItemActive: {
     backgroundColor: 'rgba(220, 38, 38, 0.12)',
-  },
-  tabEmoji: {
-    fontSize: 22,
   },
   tabLabel: {
     fontSize: 10,
