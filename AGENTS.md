@@ -1,157 +1,105 @@
-# Arise — AI Agent Operating Manual
+# BerserkLifts — AI Agent Operating Manual
 
 > **Stack:** Expo 57 · React Native 0.86 · Expo Router 5 · Zustand 5 · TypeScript 5.8
-> **Theme:** Solo Leveling / RPG gamified habit & fitness tracker (dark mode, dark purple/blue palette)
-> **Agent tooling:** GStack (garrytan/gstack) · GBrain (garrytan/gbrain) — NO Claude Code required
+> **Theme:** Berserk-inspired dark workout tracker (black + crimson red)
+> **Agent tooling:** Freebuff (Buffy) · Cline + OmniRoute · GStack · GBrain
 
 ---
 
 ## 1. Project Overview
 
-Arise is a mobile app where users level up their real-world fitness and habits like an RPG character.
-- Daily quests = habits (push-ups, water intake, journaling, etc.)
-- EXP system, level thresholds, rank badges (E → S rank)
-- Animated progress bars, level-up popups (react-native-reanimated + moti)
-- Persistent state via Zustand + AsyncStorage
-- Dark purple/midnight colour scheme
+BerserkLifts is a workout habit tracker with RPG gamification.
+- Track workouts with sets, weight, reps (Hevy-style)
+- Organize routines into folders
+- Daily habit tracking with streaks
+- XP system, rank badges, leaderboards
+- Dark theme with crimson accent (#FF2D55)
 
 ### Folder Map
 ```
 src/
-  app/           — Expo Router screens + layouts
-    (tabs)/      — Main tab screens: index, habits, workouts, progress, profile
-  components/    — Shared UI components
-  constants/     — RPG config (levels, XP thresholds, rank titles) + theme colours
-  data/          — Static data (quest templates, workout presets)
-  store/         — Zustand global store
-  types/         — TypeScript interfaces
-  utils/         — Helper functions (XP calc, date utils, etc.)
-assets/          — Images, fonts, icons
+  app/(tabs)/      — Tab screens: index, workouts, habits, progress, profile
+  components/      — Shared UI components
+  constants/       — Theme tokens (theme.ts) + RPG config (rpg.ts)
+  data/            — Static data (exercises, etc.)
+  store/           — Zustand global store (split into action files)
+  types/           — TypeScript interfaces
+  utils/           — Helper functions
 ```
 
 ---
 
-## 2. GStack Skills — How to Use
+## 2. Agent Roles & Model Recommendations
 
-GStack skills live at: `C:\Users\Crodify\.gstack-repo\`
-Linked into this project at: `.agents\skills\gstack\`
+| Role | Best Model | Cost | Use For |
+|------|-----------|------|---------|
+| **Buffy (me)** | MIMO 2.5 | Free | Architecture, complex features, full context |
+| **UI Designer** | Gemini 2.5 Pro | $1.25/M input | Visual polish, animations, pixel-perfect UI |
+| **Frontend Dev** | Claude Opus | $15/M input | Multi-file refactors, complex components |
+| **Quick Fixes** | MIMO 2.5 | Free | Bug fixes, simple changes, prototyping |
+| **Code Review** | Gemini 3.6 Flash | $0.75/M input | Fast reviews, catching issues |
 
-To invoke a skill, tell the agent to **"run the /skill-name skill"** or **"act as /skill-name"**.
-The agent reads the corresponding `SKILL.md` and follows it step-by-step.
-
-### Most Useful Skills for Arise
-
-| Say this | What happens |
-|---|---|
-| `run /plan-ceo-review on [feature]` | CEO-level product thinking — finds the 10-star version |
-| `run /plan-eng-review on [feature]` | Locks architecture, data flow, edge cases |
-| `run /plan-design-review on [screen]` | Design quality rating 0-10 per dimension |
-| `run /investigate [bug]` | Systematic root-cause debug |
-| `run /review` | Pre-commit code review |
-| `run /health` | Code quality dashboard |
-| `run /cso` | OWASP + STRIDE security audit |
-| `run /context-save` | Save current work context |
-| `run /context-restore` | Pick up where you left off |
-| `run /learn [fact]` | Teach agent something persistent |
-| `run /diagram [description]` | Generate architecture/flow diagrams |
-| `run /autoplan` | CEO → Design → Eng → DX review in one shot |
-
-### Skill Files Location
-All skill definitions are markdown files under:
-`C:\Users\Crodify\.gstack-repo\<skill-name>\SKILL.md`
+### How to Use in Cline:
+1. Select the model in Cline's model picker (via OmniRoute)
+2. Paste the relevant agent prompt from `.agents/specialized/`
+3. Start with "Read CLAUDE.md for context, then..."
+4. Give the specific task
 
 ---
 
-## 3. GBrain — Persistent Knowledge Brain
+## 3. GStack Skills
 
-**Binary:** `C:\Users\Crodify\.gbrain-repo\bin\gbrain.exe`
-**Brain DB:** `C:\Users\Crodify\.gbrain\brain.pglite`
-**Source:** `arise` → `C:\Users\Crodify\Desktop\Arise`
-
-### GBrain Commands
-```powershell
-# Search the Arise codebase
-C:\Users\Crodify\.gbrain-repo\bin\gbrain.exe search "zustand store" --source arise
-
-# Search for a code definition
-C:\Users\Crodify\.gbrain-repo\bin\gbrain.exe code-def "useAriseStore" --source arise
-
-# Re-index after big changes
-C:\Users\Crodify\.gbrain-repo\bin\gbrain.exe sync --source arise --working-tree
-
-# Check brain health
-C:\Users\Crodify\.gbrain-repo\bin\gbrain.exe doctor
-
-# List all sources
-C:\Users\Crodify\.gbrain-repo\bin\gbrain.exe sources list
-```
-
-**Tip:** After large changes, tell agent: "re-sync gbrain for the arise source"
+| Command | What It Does |
+|---------|--------------|
+| `/plan-ceo-review` | Product thinking, 10-star vision |
+| `/plan-eng-review` | Architecture, data flow, edge cases |
+| `/plan-design-review` | Design quality rating |
+| `/investigate` | Debug root cause |
+| `/review` | Pre-commit code review |
+| `/health` | Code quality dashboard |
+| `/cso` | Security audit |
+| `/context-save` | Save session memory |
+| `/context-restore` | Restore session |
+| `/learn` | Teach agent something |
+| `/autoplan` | Full review pipeline |
 
 ---
 
-## 4. Animation & UI Kit
+## 4. Multi-Agent Workflow
 
-### Packages installed
-- **react-native-reanimated** ~3.17.0 — EXP bars, screen transitions
-- **moti** ^0.30.0 — level-up popups, pulse/glow effects
-
-### Babel plugin (required)
-Add to `babel.config.js`:
-```js
-module.exports = {
-  presets: ['babel-preset-expo'],
-  plugins: ['react-native-reanimated/plugin'],
-};
+```
+You (PM) → Assign tasks to the right agent
+    │
+    ├── Buffy: "Build the habits store actions"
+    ├── Cline + Gemini: "Make the habits UI pixel-perfect"
+    ├── Cline + Claude: "Review all changes for bugs"
+    └── Buffy: "Wire everything together, test, commit"
 ```
 
-### Animation Patterns
-```tsx
-// EXP bar fill
-import Animated, { useSharedValue, withTiming, useAnimatedStyle } from 'react-native-reanimated';
-
-// Level-up popup
-import { MotiView } from 'moti';
-<MotiView
-  from={{ opacity: 0, scale: 0.5 }}
-  animate={{ opacity: 1, scale: 1 }}
-  transition={{ type: 'spring', damping: 10 }}
-/>
-```
+See `MULTI-AGENT-GUIDE.md` for detailed task splitting examples.
 
 ---
 
-## 5. Development Rules (Always Follow)
+## 5. Development Rules
 
-1. **TypeScript strict** — never use `any`
-2. **Dark theme only** — use `src/constants/theme.ts` colours
-3. **RPG tone** — "Quest Complete", "Level Up!", "Rank: E"
-4. **Zustand for all global state** — no prop drilling or Context API
-5. **Expo Router** — screens go in `src/app/`
-6. **Test on web first** (`npm run web`) then mobile
-7. **No breaking store changes** without migrating persisted data
-
----
-
-## 6. GStack Workflow for New Features
-
-```
-1. run /plan-ceo-review on [feature]   → product clarity
-2. run /plan-eng-review on [feature]   → lock architecture
-3. Build the feature (Cline or MiMo 2.5)
-4. run /review                         → catch bugs
-5. run /context-save                   → save session memory
-```
+1. **Never run `npm run reset-project`** — it deletes everything
+2. **Never delete files** without asking
+3. **Use `src/constants/theme.ts`** for all colors/spacing
+4. **Zustand for all state** — no prop drilling
+5. **TypeScript strict** — avoid `any`
+6. **Dark theme only** — #0A0A0A background
+7. **Test with `npx tsc --noEmit`** before committing
+8. **Commit with descriptive messages** — what and why
 
 ---
 
-## 7. Upgrading Tools
+## 6. Key Files to Read First
 
-```powershell
-# Upgrade GBrain
-cd C:\Users\Crodify\.gbrain-repo; git pull; bun install
-bun build --compile --outfile bin/gbrain.exe src/cli.ts
-
-# Upgrade GStack
-cd C:\Users\Crodify\.gstack-repo; git pull; bun install; bun run gen:skill-docs
-```
+| File | Why |
+|------|-----|
+| `CLAUDE.md` | Project context for any AI agent |
+| `MULTI-AGENT-GUIDE.md` | How to split tasks between agents |
+| `src/constants/theme.ts` | All design tokens |
+| `src/types/index.ts` | All TypeScript interfaces |
+| `src/store/index.ts` | Zustand store setup |
+| `src/app/(tabs)/_layout.tsx` | Tab navigation |
