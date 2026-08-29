@@ -1,28 +1,34 @@
 import { Tabs } from 'expo-router';
 import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 
-const TabIcon = ({ 
-  icon, 
-  label, 
-  focused 
-}: { 
-  icon: keyof typeof Ionicons.glyphMap; 
-  label: string; 
+const EMOJI_ICONS: Record<string, { active: string; inactive: string }> = {
+  dashboard: { active: '📊', inactive: '📋' },
+  workouts: { active: '🏋️', inactive: '💪' },
+  habits: { active: '✅', inactive: '☑️' },
+  progress: { active: '📈', inactive: '📉' },
+  profile: { active: '👤', inactive: '👥' },
+};
+
+const TabIcon = ({
+  tab,
+  label,
+  focused
+}: {
+  tab: string;
+  label: string;
   focused: boolean;
-}) => (
-  <View style={[styles.tabItem, focused && styles.tabItemActive]}>
-    <Ionicons 
-      name={icon} 
-      size={24} 
-      color={focused ? Colors.primary : Colors.textMuted} 
-    />
-    <Text style={[styles.tabLabel, focused && styles.tabLabelActive]}>
-      {label}
-    </Text>
-  </View>
-);
+}) => {
+  const icons = EMOJI_ICONS[tab];
+  return (
+    <View style={[styles.tabItem, focused && styles.tabItemActive]}>
+      <Text style={styles.tabEmoji}>{focused ? icons.active : icons.inactive}</Text>
+      <Text style={[styles.tabLabel, focused && styles.tabLabelActive]}>
+        {label}
+      </Text>
+    </View>
+  );
+};
 
 export default function TabLayout() {
   return (
@@ -38,7 +44,7 @@ export default function TabLayout() {
         options={{
           title: '',
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon={focused ? "grid" : "grid-outline"} label="Dashboard" focused={focused} />
+            <TabIcon tab="dashboard" label="Dashboard" focused={focused} />
           ),
         }}
       />
@@ -47,7 +53,7 @@ export default function TabLayout() {
         options={{
           title: '',
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon={focused ? "barbell" : "barbell-outline"} label="Workouts" focused={focused} />
+            <TabIcon tab="workouts" label="Workouts" focused={focused} />
           ),
         }}
       />
@@ -56,7 +62,7 @@ export default function TabLayout() {
         options={{
           title: '',
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon={focused ? "checkmark-circle" : "checkmark-circle-outline"} label="Habits" focused={focused} />
+            <TabIcon tab="habits" label="Habits" focused={focused} />
           ),
         }}
       />
@@ -65,7 +71,7 @@ export default function TabLayout() {
         options={{
           title: '',
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon={focused ? "stats-chart" : "stats-chart-outline"} label="Progress" focused={focused} />
+            <TabIcon tab="progress" label="Progress" focused={focused} />
           ),
         }}
       />
@@ -74,7 +80,7 @@ export default function TabLayout() {
         options={{
           title: '',
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon={focused ? "person" : "person-outline"} label="Profile" focused={focused} />
+            <TabIcon tab="profile" label="Profile" focused={focused} />
           ),
         }}
       />
@@ -101,6 +107,9 @@ const styles = StyleSheet.create({
   },
   tabItemActive: {
     backgroundColor: 'rgba(220, 38, 38, 0.12)',
+  },
+  tabEmoji: {
+    fontSize: 22,
   },
   tabLabel: {
     fontSize: 10,
