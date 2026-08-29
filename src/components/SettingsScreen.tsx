@@ -7,6 +7,19 @@ import { exportData, importData, clearAllData, getBackupInfo } from '@/utils/dat
 const REST_TIMER_OPTIONS = [30, 60, 90, 120, 180, 300];
 const GOAL_OPTIONS = [3, 4, 5, 6, 7]; // workouts per week
 
+// Local settings (not in store, just UI toggles for now)
+const DEFAULT_LOCAL = {
+  hapticFeedback: true,
+  soundEffects: true,
+  workoutReminders: false,
+  plateCalculator: false,
+  rpeTracking: false,
+  smartSupersetScroll: true,
+  inlineTimer: false,
+  livePRNotification: true,
+  keepAwake: false,
+};
+
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -21,6 +34,8 @@ export function SettingsScreen({ visible, onClose }: Props) {
   const [backupInfo, setBackupInfo] = useState({ hasData: false, size: '0 KB' });
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [localSettings, setLocalSettings] = useState(DEFAULT_LOCAL);
+  const toggleLocal = (key: keyof typeof DEFAULT_LOCAL) => setLocalSettings(prev => ({ ...prev, [key]: !prev[key] }));
 
   useEffect(() => {
     if (visible) getBackupInfo().then(setBackupInfo);
@@ -91,6 +106,123 @@ export function SettingsScreen({ visible, onClose }: Props) {
               <Text style={s.settingValue}>{settings.bodyWeightGoal ? `${settings.bodyWeightGoal} kg` : '—'}</Text>
               <Text style={s.arrow}>›</Text>
             </TouchableOpacity>
+
+            {/* Workout Features */}
+            <Text style={s.sectionLabel}>WORKOUT FEATURES</Text>
+
+            <View style={s.settingRow}>
+              <Text style={s.settingIcon}>😴</Text>
+              <Text style={s.settingText}>Keep Awake During Workout</Text>
+              <TouchableOpacity
+                style={[s.toggle, localSettings.keepAwake && s.toggleOn]}
+                onPress={() => toggleLocal('keepAwake')}
+              >
+                <View style={[s.toggleDot, localSettings.keepAwake && s.toggleDotOn]} />
+              </TouchableOpacity>
+            </View>
+            <Text style={s.settingDesc}>Prevents your phone from sleeping while in a workout</Text>
+
+            <View style={s.settingRow}>
+              <Text style={s.settingIcon}>🔢</Text>
+              <Text style={s.settingText}>Plate Calculator</Text>
+              <TouchableOpacity
+                style={[s.toggle, localSettings.plateCalculator && s.toggleOn]}
+                onPress={() => toggleLocal('plateCalculator')}
+              >
+                <View style={[s.toggleDot, localSettings.plateCalculator && s.toggleDotOn]} />
+              </TouchableOpacity>
+            </View>
+            <Text style={s.settingDesc}>Shows plate breakdown when inputting barbell weight</Text>
+
+            <View style={s.settingRow}>
+              <Text style={s.settingIcon}>💪</Text>
+              <Text style={s.settingText}>RPE Tracking</Text>
+              <TouchableOpacity
+                style={[s.toggle, localSettings.rpeTracking && s.toggleOn]}
+                onPress={() => toggleLocal('rpeTracking')}
+              >
+                <View style={[s.toggleDot, localSettings.rpeTracking && s.toggleDotOn]} />
+              </TouchableOpacity>
+            </View>
+            <Text style={s.settingDesc}>Log perceived exertion (RPE) for each set</Text>
+
+            <View style={s.settingRow}>
+              <Text style={s.settingIcon}>🔗</Text>
+              <Text style={s.settingText}>Smart Superset Scrolling</Text>
+              <TouchableOpacity
+                style={[s.toggle, localSettings.smartSupersetScroll && s.toggleOn]}
+                onPress={() => toggleLocal('smartSupersetScroll')}
+              >
+                <View style={[s.toggleDot, localSettings.smartSupersetScroll && s.toggleDotOn]} />
+              </TouchableOpacity>
+            </View>
+            <Text style={s.settingDesc}>Auto-scroll to next exercise in superset after completing a set</Text>
+
+            <View style={s.settingRow}>
+              <Text style={s.settingIcon}>⏱️</Text>
+              <Text style={s.settingText}>Inline Timer</Text>
+              <TouchableOpacity
+                style={[s.toggle, localSettings.inlineTimer && s.toggleOn]}
+                onPress={() => toggleLocal('inlineTimer')}
+              >
+                <View style={[s.toggleDot, localSettings.inlineTimer && s.toggleDotOn]} />
+              </TouchableOpacity>
+            </View>
+            <Text style={s.settingDesc}>Built-in stopwatch for duration-based exercises</Text>
+
+            <View style={s.settingRow}>
+              <Text style={s.settingIcon}>🏆</Text>
+              <Text style={s.settingText}>Live PR Notification</Text>
+              <TouchableOpacity
+                style={[s.toggle, localSettings.livePRNotification && s.toggleOn]}
+                onPress={() => toggleLocal('livePRNotification')}
+              >
+                <View style={[s.toggleDot, localSettings.livePRNotification && s.toggleDotOn]} />
+              </TouchableOpacity>
+            </View>
+            <Text style={s.settingDesc}>Notify when you hit a personal record during workout</Text>
+
+            {/* Sounds & Haptics */}
+            <Text style={s.sectionLabel}>SOUNDS & HAPTICS</Text>
+
+            <View style={s.settingRow}>
+              <Text style={s.settingIcon}>📳</Text>
+              <Text style={s.settingText}>Haptic Feedback</Text>
+              <TouchableOpacity
+                style={[s.toggle, localSettings.hapticFeedback && s.toggleOn]}
+                onPress={() => toggleLocal('hapticFeedback')}
+              >
+                <View style={[s.toggleDot, localSettings.hapticFeedback && s.toggleDotOn]} />
+              </TouchableOpacity>
+            </View>
+            <Text style={s.settingDesc}>Vibrate on set complete, rest timer warning, and timer end</Text>
+
+            <View style={s.settingRow}>
+              <Text style={s.settingIcon}>🔊</Text>
+              <Text style={s.settingText}>Sound Effects</Text>
+              <TouchableOpacity
+                style={[s.toggle, localSettings.soundEffects && s.toggleOn]}
+                onPress={() => toggleLocal('soundEffects')}
+              >
+                <View style={[s.toggleDot, localSettings.soundEffects && s.toggleDotOn]} />
+              </TouchableOpacity>
+            </View>
+            <Text style={s.settingDesc}>Beep sounds for rest timer and set completion</Text>
+
+            {/* Notifications */}
+            <Text style={s.sectionLabel}>NOTIFICATIONS</Text>
+
+            <View style={s.settingRow}>
+              <Text style={s.settingIcon}>🔔</Text>
+              <Text style={s.settingText}>Workout Reminders</Text>
+              <TouchableOpacity
+                style={[s.toggle, localSettings.workoutReminders && s.toggleOn]}
+                onPress={() => toggleLocal('workoutReminders')}
+              >
+                <View style={[s.toggleDot, localSettings.workoutReminders && s.toggleDotOn]} />
+              </TouchableOpacity>
+            </View>
+            <Text style={s.settingDesc}>Remind you to work out on rest days</Text>
 
             {/* Appearance */}
             <Text style={s.sectionLabel}>APPEARANCE</Text>
@@ -188,6 +320,24 @@ export function SettingsScreen({ visible, onClose }: Props) {
               <Text style={s.arrow}>›</Text>
             </TouchableOpacity>
 
+            {/* About */}
+            <Text style={s.sectionLabel}>ABOUT</Text>
+            <View style={s.settingRow}>
+              <Text style={s.settingIcon}>📱</Text>
+              <Text style={s.settingText}>Version</Text>
+              <Text style={s.settingValue}>1.0.0</Text>
+            </View>
+            <View style={s.settingRow}>
+              <Text style={s.settingIcon}>⚔️</Text>
+              <Text style={s.settingText}>App Name</Text>
+              <Text style={s.settingValue}>BerserkLifts</Text>
+            </View>
+            <View style={s.settingRow}>
+              <Text style={s.settingIcon}>💻</Text>
+              <Text style={s.settingText}>Built With</Text>
+              <Text style={s.settingValue}>React Native + Expo</Text>
+            </View>
+
             <View style={{ height: 40 }} />
           </ScrollView>
         </View>
@@ -275,6 +425,7 @@ const s = StyleSheet.create({
   settingIcon: { fontSize: 18, marginRight: Spacing.md },
   settingText: { flex: 1, fontSize: FontSize.md, fontWeight: '600', color: Colors.text },
   settingValue: { fontSize: FontSize.sm, fontWeight: '700', color: Colors.textSecondary, marginRight: Spacing.sm },
+  settingDesc: { fontSize: FontSize.xs, color: Colors.textMuted, marginTop: -Spacing.xs, marginBottom: Spacing.sm, marginLeft: Spacing.xxl + Spacing.md, paddingLeft: 0 },
   arrow: { fontSize: 22, color: Colors.textMuted },
   toggle: { width: 48, height: 28, borderRadius: 14, backgroundColor: Colors.surfaceLight, borderWidth: 1, borderColor: Colors.border, justifyContent: 'center', paddingHorizontal: 3 },
   toggleOn: { backgroundColor: Colors.success, borderColor: Colors.success },
