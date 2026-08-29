@@ -4,6 +4,7 @@ import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
 import { ExercisePickerModal } from './ExercisePickerModal';
 import { ExerciseDetailScreen } from './ExerciseDetailScreen';
+import { WorkoutSettingsScreen } from './WorkoutSettingsScreen';
 import { playRestWarningBeep, playRestCompleteBeep, playSetCompleteBeep } from '@/utils/sounds';
 import { SetType } from '@/types';
 
@@ -38,6 +39,7 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
   const [setTypeModal, setSetTypeModal] = useState<{ exerciseId: string; setId: string; current: SetType; setNumber: number } | null>(null);
   const [exerciseRestModal, setExerciseRestModal] = useState<{ exerciseId: string; current: number } | null>(null);
   const [quickRestPicker, setQuickRestPicker] = useState(false);
+  const [showWorkoutSettings, setShowWorkoutSettings] = useState(false);
 
   const [restRemaining, setRestRemaining] = useState(0);
   const [restActive, setRestActive] = useState(false);
@@ -139,7 +141,6 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
         <Text style={s.headerTitle}>Log Workout</Text>
         <TouchableOpacity style={s.restTimerHeaderBtn} onPress={() => setQuickRestPicker(true)}>
           <Text style={s.restTimerHeaderIcon}>⏱</Text>
-          <Text style={s.restTimerHeaderText}>{formatRest(settings.defaultRestTimer)}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={s.finishBtn} onPress={() => setShowFinish(true)}>
           <Text style={s.finishBtnTxt}>Finish</Text>
@@ -314,7 +315,7 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
 
         {/* Bottom Actions */}
         <View style={s.bottomActions}>
-          <TouchableOpacity style={s.settingsBtn}>
+          <TouchableOpacity style={s.settingsBtn} onPress={() => setShowWorkoutSettings(true)}>
             <Text style={s.settingsBtnTxt}>Settings</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.discardBtn} onPress={() => setShowFinish(true)}>
@@ -482,6 +483,8 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
           </View>
         </View>
       </Modal>
+      {/* Workout Settings */}
+      <WorkoutSettingsScreen visible={showWorkoutSettings} onClose={() => setShowWorkoutSettings(false)} />
     </View>
   );
 }
@@ -494,9 +497,8 @@ const s = StyleSheet.create({
   collapseBtn: { padding: Spacing.sm },
   collapseIcon: { fontSize: 22, color: Colors.textSecondary, fontWeight: '600' },
   headerTitle: { flex: 1, fontSize: FontSize.lg, fontWeight: '700', color: Colors.text, marginLeft: Spacing.xs },
-  restTimerHeaderBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surface, borderRadius: BorderRadius.sm, paddingHorizontal: Spacing.sm, paddingVertical: Spacing.xs, marginRight: Spacing.sm, borderWidth: 1, borderColor: Colors.border },
-  restTimerHeaderIcon: { fontSize: 14, marginRight: Spacing.xs },
-  restTimerHeaderText: { fontSize: FontSize.xs, fontWeight: '800', color: Colors.text },
+  restTimerHeaderBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.surface, justifyContent: 'center', alignItems: 'center', marginRight: Spacing.sm, borderWidth: 1, borderColor: Colors.border },
+  restTimerHeaderIcon: { fontSize: 18 },
   finishBtn: { backgroundColor: Colors.primary, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm, borderRadius: BorderRadius.full },
   finishBtnTxt: { fontSize: FontSize.sm, fontWeight: '800', color: Colors.white },
 
