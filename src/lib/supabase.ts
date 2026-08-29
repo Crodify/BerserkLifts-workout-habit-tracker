@@ -3,9 +3,8 @@ import 'react-native-get-random-values';
 import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// ⚠️ Replace these with your Supabase project URL and anon key
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://bctvgrlkkdznmihucypp.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjdHZncmxra2R6bm1paHVjeXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMjcxNTUsImV4cCI6MjEwMzYwMzE1NX0.rolCQie-6lrdfMZaLZuIHhmpTry1LPZ4BRIcgu3lplA';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
