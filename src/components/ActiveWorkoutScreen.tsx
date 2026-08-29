@@ -152,7 +152,7 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
               <Text style={[s.setLabel, { width: 40 }]}>SET</Text>
               <Text style={[s.setLabel, { flex: 1, textAlign: 'center' }]}>KG</Text>
               <Text style={[s.setLabel, { flex: 1, textAlign: 'center' }]}>REPS</Text>
-              <View style={{ width: 44 }} />
+              <View style={{ width: 52 }} />
             </View>
             {ex.sets.map((set, i) => (
               <View key={set.id} style={[s.setRow, set.completed && s.setDone]}>
@@ -268,9 +268,9 @@ const s = StyleSheet.create({
   setInputDone: { borderColor: Colors.success, opacity: 0.6 },
   setDone: { opacity: 0.6 },
   setDoneTxt: { color: Colors.success },
-  checkBtn: { width: 40, height: 36, borderRadius: BorderRadius.sm, borderWidth: 2, borderColor: Colors.border, justifyContent: 'center', alignItems: 'center' },
-  checkDone: { backgroundColor: Colors.success, borderColor: Colors.success },
-  checkTxt: { fontSize: 16, color: Colors.white, fontWeight: '900' },
+  checkBtn: { width: 48, height: 44, borderRadius: BorderRadius.md, borderWidth: 2, borderColor: Colors.borderLight, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.surfaceLight },
+  checkDone: { backgroundColor: Colors.success, borderColor: Colors.success, shadowColor: Colors.success, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.4, shadowRadius: 6, elevation: 4 },
+  checkTxt: { fontSize: 20, color: Colors.white, fontWeight: '900' },
   exActions: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.sm },
   addSetBtn: { paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md },
   addSetTxt: { fontSize: FontSize.xs, fontWeight: '800', color: Colors.primary, letterSpacing: 1 },
