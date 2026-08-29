@@ -12,9 +12,11 @@ interface Props {
 }
 
 export function SettingsScreen({ visible, onClose }: Props) {
-  const { settings, setWeightUnit, setDefaultRestTimer, setAutoStartRestTimer, profile } = useStore();
+  const { settings, setWeightUnit, setDefaultRestTimer, setAutoStartRestTimer, setWeeklyWorkoutGoal, setBodyWeightGoal } = useStore();
   const [showRestPicker, setShowRestPicker] = useState(false);
   const [showGoalPicker, setShowGoalPicker] = useState(false);
+  const [showWeightGoal, setShowWeightGoal] = useState(false);
+  const [weightGoalInput, setWeightGoalInput] = useState(String(settings.bodyWeightGoal || ''));
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -71,14 +73,14 @@ export function SettingsScreen({ visible, onClose }: Props) {
             <TouchableOpacity style={s.settingRow} onPress={() => setShowGoalPicker(true)}>
               <Text style={s.settingIcon}>🎯</Text>
               <Text style={s.settingText}>Weekly Workout Goal</Text>
-              <Text style={s.settingValue}>5x / week</Text>
+              <Text style={s.settingValue}>{settings.weeklyWorkoutGoal || 5}x / week</Text>
               <Text style={s.arrow}>›</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={s.settingRow}>
+            <TouchableOpacity style={s.settingRow} onPress={() => { setWeightGoalInput(String(settings.bodyWeightGoal || '')); setShowWeightGoal(true); }}>
               <Text style={s.settingIcon}>⚖️</Text>
               <Text style={s.settingText}>Body Weight Goal</Text>
-              <Text style={s.settingValue}>—</Text>
+              <Text style={s.settingValue}>{settings.bodyWeightGoal ? `${settings.bodyWeightGoal} kg` : '—'}</Text>
               <Text style={s.arrow}>›</Text>
             </TouchableOpacity>
 
@@ -134,10 +136,38 @@ export function SettingsScreen({ visible, onClose }: Props) {
             <View style={s.pickerBox}>
               <Text style={s.pickerTitle}>WEEKLY GOAL</Text>
               {GOAL_OPTIONS.map((num) => (
-                <TouchableOpacity key={num} style={s.pickerOpt} onPress={() => setShowGoalPicker(false)}>
-                  <Text style={s.pickerOptTxt}>{num} workouts / week</Text>
+                <TouchableOpacity
+                  key={num}
+                  style={[s.pickerOpt, settings.weeklyWorkoutGoal === num && s.pickerOptActive]}
+                  onPress={() => { setWeeklyWorkoutGoal(num); setShowGoalPicker(false); }}
+                >
+                  <Text style={[s.pickerOptTxt, settings.weeklyWorkoutGoal === num && s.pickerOptTxtActive]}>{num} workouts / week</Text>
                 </TouchableOpacity>
               ))}
+            </View>
+          </TouchableOpacity>
+        </Modal>
+
+        {/* Body Weight Goal Picker */}
+        <Modal visible={showWeightGoal} transparent animationType="fade" onRequestClose={() => setShowWeightGoal(false)}>
+          <TouchableOpacity style={s.pickerOverlay} activeOpacity={1} onPress={() => setShowWeightGoal(false)}>
+            <View style={s.pickerBox}>
+              <Text style={s.pickerTitle}>BODY WEIGHT GOAL</Text>
+              <TextInput
+                style={{ backgroundColor: Colors.surface, borderRadius: BorderRadius.md, borderWidth: 1, borderColor: Colors.border, padding: Spacing.md, color: Colors.text, fontSize: FontSize.lg, fontWeight: '700', textAlign: 'center', marginBottom: Spacing.md }}
+                keyboardType="decimal-pad"
+                value={weightGoalInput}
+                onChangeText={setWeightGoalInput}
+                placeholder="Enter weight in kg"
+                placeholderTextColor={Colors.textMuted}
+                autoFocus
+              />
+              <TouchableOpacity
+                style={[s.pickerOpt, s.pickerOptActive]}
+                onPress={() => { setBodyWeightGoal(parseFloat(weightGoalInput) || 0); setShowWeightGoal(false); }}
+              >
+                <Text style={[s.pickerOptTxt, s.pickerOptTxtActive]}>SAVE</Text>
+              </TouchableOpacity>
             </View>
           </TouchableOpacity>
         </Modal>

@@ -156,6 +156,8 @@ export interface AppSettings {
   defaultRestTimer: number; // seconds
   autoStartRestTimer: boolean;
   theme: 'dark'; // Only dark for now
+  weeklyWorkoutGoal: number; // workouts per week
+  bodyWeightGoal: number; // target weight in kg
 }
 
 export interface AppState {
@@ -212,6 +214,8 @@ export interface AppState {
   setWeightUnit: (unit: WeightUnit) => void;
   setDefaultRestTimer: (seconds: number) => void;
   setAutoStartRestTimer: (enabled: boolean) => void;
+  setWeeklyWorkoutGoal: (goal: number) => void;
+  setBodyWeightGoal: (weight: number) => void;
   
   // Challenge Actions
   challenges: Challenge[];

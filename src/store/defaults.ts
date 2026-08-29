@@ -60,4 +60,6 @@ export const defaultSettings = {
   defaultRestTimer: 90,
   autoStartRestTimer: true,
   theme: 'dark' as const,
+  weeklyWorkoutGoal: 5,
+  bodyWeightGoal: 0,
 };

@@ -28,7 +28,7 @@ function formatRest(seconds: number) {
 }
 
 export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
-  const { activeWorkout, settings, toggleSetComplete, addSetToExercise, updateSet, updateSetType, addExerciseToWorkout, removeExerciseFromWorkout, toggleSuperset, completeWorkout, cancelWorkout } = useStore();
+  const { activeWorkout, settings, toggleSetComplete, addSetToExercise, updateSet, updateSetType, updateExerciseNotes, addExerciseToWorkout, removeExerciseFromWorkout, toggleSuperset, completeWorkout, cancelWorkout } = useStore();
   const [elapsed, setElapsed] = useState(0);
   const [showPicker, setShowPicker] = useState(false);
   const [showFinish, setShowFinish] = useState(false);
@@ -73,16 +73,22 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
     }, 1000);
   }, [dismissRestTimer, restProgress]);
 
-  const adjustRest = (delta: number) => {
+  const adjustRest = useCallback((delta: number) => {
     setRestRemaining(prev => {
       const next = Math.max(0, prev + delta);
-      if (next === 0) { dismissRestTimer(); playRestCompleteBeep(); }
+      if (next === 0) {
+        if (restIntervalRef.current) clearInterval(restIntervalRef.current);
+        restIntervalRef.current = null;
+        setRestActive(false);
+        playRestCompleteBeep();
+      }
+      // Restart animation with new duration
+      restProgress.stopAnimation();
+      restProgress.setValue(1);
+      Animated.timing(restProgress, { toValue: 0, duration: next * 1000, useNativeDriver: false }).start();
       return next;
     });
-    // Restart animation
-    restProgress.setValue(0);
-    Animated.timing(restProgress, { toValue: 1, duration: (restRemaining + delta) * 1000, useNativeDriver: false }).start();
-  };
+  }, [restProgress]);
 
   const handleToggleSet = useCallback((exerciseId: string, setId: string) => {
     const exercise = activeWorkout?.exercises.find(e => e.id === exerciseId);
@@ -196,8 +202,8 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
                 style={s.notesInput}
                 placeholder="Add notes here..."
                 placeholderTextColor={Colors.textMuted}
-                value={''}
-                onChangeText={() => {}}
+                value={ex.notes || ''}
+                onChangeText={(v) => updateExerciseNotes(ex.id, v)}
               />
 
               {/* Rest Timer Info */}
@@ -382,7 +388,7 @@ const s = StyleSheet.create({
   headerTitle: { flex: 1, fontSize: FontSize.lg, fontWeight: '700', color: Colors.text, marginLeft: Spacing.xs },
   timerBtn: { padding: Spacing.sm, marginRight: Spacing.sm },
   timerIcon: { fontSize: 18, color: Colors.textSecondary },
-  finishBtn: { backgroundColor: Colors.info, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm, borderRadius: BorderRadius.full },
+  finishBtn: { backgroundColor: Colors.primary, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm, borderRadius: BorderRadius.full },
   finishBtnTxt: { fontSize: FontSize.sm, fontWeight: '800', color: Colors.white },
 
   // ── STATS BAR ──
@@ -390,21 +396,21 @@ const s = StyleSheet.create({
   statItem: { flex: 1, alignItems: 'center' },
   statLabel: { fontSize: 10, fontWeight: '600', color: Colors.textMuted, marginBottom: 2 },
   statValue: { fontSize: FontSize.md, fontWeight: '800', color: Colors.text },
-  statValueBlue: { fontSize: FontSize.md, fontWeight: '800', color: Colors.info },
+  statValueBlue: { fontSize: FontSize.md, fontWeight: '800', color: Colors.primary },
 
   scroll: { flex: 1 },
   scrollContent: { padding: Spacing.md },
 
   // ── EXERCISE BLOCK (flat, no card wrapper — matches Hevy) ──
   exBlock: { marginBottom: Spacing.lg, paddingBottom: Spacing.md, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  exBlockSuperset: { borderLeftWidth: 3, borderLeftColor: Colors.info, paddingLeft: Spacing.sm },
+  exBlockSuperset: { borderLeftWidth: 3, borderLeftColor: Colors.primary, paddingLeft: Spacing.sm },
   exHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.xs },
   exHeaderLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   exAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.surface, justifyContent: 'center', alignItems: 'center', marginRight: Spacing.sm, borderWidth: 1, borderColor: Colors.border },
   exAvatarTxt: { fontSize: 16 },
-  exName: { fontSize: FontSize.md, fontWeight: '700', color: Colors.info },
+  exName: { fontSize: FontSize.md, fontWeight: '700', color: Colors.primary },
   exHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
-  supersetBadge: { width: 22, height: 22, borderRadius: 6, backgroundColor: Colors.info, justifyContent: 'center', alignItems: 'center' },
+  supersetBadge: { width: 22, height: 22, borderRadius: 6, backgroundColor: Colors.primary, justifyContent: 'center', alignItems: 'center' },
   supersetTxt: { fontSize: 11, fontWeight: '900', color: Colors.white },
   moreBtn: { padding: Spacing.xs },
   moreDots: { fontSize: 20, color: Colors.textMuted, fontWeight: '800' },
@@ -414,21 +420,21 @@ const s = StyleSheet.create({
 
   // Rest Timer Info
   restInfo: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.sm },
-  restInfoIcon: { fontSize: 12, color: Colors.info, marginRight: Spacing.xs },
-  restInfoText: { fontSize: FontSize.xs, fontWeight: '700', color: Colors.info },
+  restInfoIcon: { fontSize: 12, color: Colors.primary, marginRight: Spacing.xs },
+  restInfoText: { fontSize: FontSize.xs, fontWeight: '700', color: Colors.primary },
 
   // ── COLUMN HEADERS ──
   colRow: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.xs, paddingHorizontal: 2 },
-  colLabel: { fontSize: 10, fontWeight: '800', color: Colors.textMuted, letterSpacing: 1, width: 44, textAlign: 'center' },
-  colLabelPrevious: { fontSize: 10, fontWeight: '800', color: Colors.textMuted, letterSpacing: 1, flex: 1, textAlign: 'center' },
+  colLabel: { fontSize: 10, fontWeight: '800', color: Colors.textMuted, letterSpacing: 1, width: 40, textAlign: 'center' },
+  colLabelPrevious: { fontSize: 10, fontWeight: '800', color: Colors.textMuted, letterSpacing: 1, flex: 1, textAlign: 'left', paddingLeft: Spacing.xs },
 
   // ── SET ROW (Hevy style) ──
   setRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4, backgroundColor: Colors.surface, borderRadius: BorderRadius.sm, paddingVertical: Spacing.sm, paddingHorizontal: Spacing.xs },
   setRowDone: { backgroundColor: 'rgba(48, 209, 88, 0.12)' },
   setNum: { width: 36, height: 36, borderRadius: BorderRadius.sm, backgroundColor: Colors.surfaceLight, justifyContent: 'center', alignItems: 'center', marginRight: Spacing.xs },
   setNumTxt: { fontSize: FontSize.sm, fontWeight: '800', color: Colors.textSecondary },
-  prevText: { flex: 1, fontSize: FontSize.xs, color: Colors.textTertiary, textAlign: 'center', fontStyle: 'italic' },
-  setInput: { width: 56, height: 36, backgroundColor: Colors.background, borderRadius: BorderRadius.sm, borderWidth: 1, borderColor: Colors.border, paddingHorizontal: Spacing.xs, color: Colors.text, fontSize: FontSize.sm, fontWeight: '700', textAlign: 'center', marginHorizontal: 3 },
+  prevText: { flex: 1, fontSize: FontSize.xs, color: Colors.textTertiary, textAlign: 'left', fontStyle: 'italic', paddingLeft: Spacing.xs },
+  setInput: { width: 60, height: 36, backgroundColor: Colors.background, borderRadius: BorderRadius.sm, borderWidth: 1, borderColor: Colors.border, paddingHorizontal: Spacing.xs, color: Colors.text, fontSize: FontSize.md, fontWeight: '700', textAlign: 'center', marginHorizontal: 2 },
   setInputDone: { borderColor: Colors.success, backgroundColor: 'rgba(48, 209, 88, 0.06)' },
   checkBtn: { width: 40, height: 36, borderRadius: BorderRadius.sm, borderWidth: 1.5, borderColor: Colors.borderLight, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.surfaceLight, marginLeft: Spacing.xs },
   checkDone: { backgroundColor: Colors.success, borderColor: Colors.success },
@@ -439,7 +445,7 @@ const s = StyleSheet.create({
   addSetTxt: { fontSize: FontSize.sm, fontWeight: '700', color: Colors.textSecondary },
 
   // ── ADD EXERCISE (blue pill — Hevy style) ──
-  addExBtn: { backgroundColor: Colors.info, borderRadius: BorderRadius.full, paddingVertical: Spacing.md, alignItems: 'center', marginBottom: Spacing.lg },
+  addExBtn: { backgroundColor: Colors.primary, borderRadius: BorderRadius.full, paddingVertical: Spacing.md, alignItems: 'center', marginBottom: Spacing.lg },
   addExTxt: { fontSize: FontSize.md, fontWeight: '800', color: Colors.white },
 
   // ── BOTTOM ACTIONS ──
@@ -452,12 +458,12 @@ const s = StyleSheet.create({
   // ── REST TIMER BAR (bottom, Hevy style) ──
   restBar: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: Colors.backgroundElevated, borderTopWidth: 1, borderTopColor: Colors.border },
   restProgressTrack: { height: 3, backgroundColor: Colors.surfaceLight },
-  restProgressFill: { height: '100%', backgroundColor: Colors.info },
+  restProgressFill: { height: '100%', backgroundColor: Colors.primary },
   restBarInner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, gap: Spacing.md },
   restAdjustBtn: { backgroundColor: Colors.surface, borderRadius: BorderRadius.sm, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm, borderWidth: 1, borderColor: Colors.border },
   restAdjustTxt: { fontSize: FontSize.sm, fontWeight: '800', color: Colors.textSecondary },
   restTimer: { fontSize: FontSize.xxxl, fontWeight: '900', color: Colors.text, fontVariant: ['tabular-nums'], minWidth: 80, textAlign: 'center' },
-  restSkipBtn: { backgroundColor: Colors.info, borderRadius: BorderRadius.sm, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm },
+  restSkipBtn: { backgroundColor: Colors.primary, borderRadius: BorderRadius.sm, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm },
   restSkipTxt: { fontSize: FontSize.sm, fontWeight: '800', color: Colors.white },
 
   // ── MODALS ──

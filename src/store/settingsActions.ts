@@ -19,4 +19,16 @@ export const settingsActions = (set: any, get: any) => ({
       settings: { ...state.settings, autoStartRestTimer: enabled },
     }));
   },
+
+  setWeeklyWorkoutGoal: (goal: number) => {
+    set((state: any) => ({
+      settings: { ...state.settings, weeklyWorkoutGoal: goal },
+    }));
+  },
+
+  setBodyWeightGoal: (weight: number) => {
+    set((state: any) => ({
+      settings: { ...state.settings, bodyWeightGoal: weight },
+    }));
+  },
 });
