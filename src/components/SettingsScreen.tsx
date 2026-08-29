@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
+import { exportData, importData, clearAllData, getBackupInfo } from '@/utils/dataUtils';
 
 const REST_TIMER_OPTIONS = [30, 60, 90, 120, 180, 300];
 const GOAL_OPTIONS = [3, 4, 5, 6, 7]; // workouts per week
@@ -17,6 +18,13 @@ export function SettingsScreen({ visible, onClose }: Props) {
   const [showGoalPicker, setShowGoalPicker] = useState(false);
   const [showWeightGoal, setShowWeightGoal] = useState(false);
   const [weightGoalInput, setWeightGoalInput] = useState(String(settings.bodyWeightGoal || ''));
+  const [backupInfo, setBackupInfo] = useState({ hasData: false, size: '0 KB' });
+  const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
+
+  useEffect(() => {
+    if (visible) getBackupInfo().then(setBackupInfo);
+  }, [visible]);
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -99,10 +107,84 @@ export function SettingsScreen({ visible, onClose }: Props) {
             </View>
 
             {/* Data */}
-            <Text style={s.sectionLabel}>DATA</Text>
-            <TouchableOpacity style={s.settingRow}>
+            <Text style={s.sectionLabel}>DATA MANAGEMENT</Text>
+            <View style={s.settingRow}>
+              <Text style={s.settingIcon}>💾</Text>
+              <Text style={s.settingText}>Backup Size</Text>
+              <Text style={s.settingValue}>{backupInfo.size}</Text>
+            </View>
+
+            <TouchableOpacity
+              style={[s.settingRow, exporting && { opacity: 0.5 }]}
+              onPress={async () => {
+                setExporting(true);
+                const success = await exportData();
+                setExporting(false);
+                if (success) Alert.alert('Export Complete', 'Your data has been shared.');
+                else Alert.alert('Export Failed', 'Could not export data.');
+              }}
+              disabled={exporting}
+            >
               <Text style={s.settingIcon}>📤</Text>
-              <Text style={s.settingText}>Export Workout Data</Text>
+              <Text style={s.settingText}>{exporting ? 'Exporting...' : 'Export Backup'}</Text>
+              <Text style={s.arrow}>›</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[s.settingRow, importing && { opacity: 0.5 }]}
+              onPress={async () => {
+                Alert.alert(
+                  'Import Data',
+                  'This will replace all current data with the backup. This cannot be undone.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Import',
+                      onPress: async () => {
+                        setImporting(true);
+                        const result = await importData();
+                        setImporting(false);
+                        if (result.success) {
+                          Alert.alert('Import Complete', result.message + '\n\nRestart the app to see changes.', [{ text: 'OK' }]);
+                        } else if (result.message !== 'Import cancelled') {
+                          Alert.alert('Import Failed', result.message);
+                        }
+                      },
+                    },
+                  ]
+                );
+              }}
+              disabled={importing}
+            >
+              <Text style={s.settingIcon}>📥</Text>
+              <Text style={s.settingText}>{importing ? 'Importing...' : 'Import Backup'}</Text>
+              <Text style={s.arrow}>›</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={s.settingRow}
+              onPress={() => {
+                Alert.alert(
+                  'Factory Reset',
+                  'This will delete ALL your workouts, habits, routines, and settings. This cannot be undone!',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Delete Everything',
+                      style: 'destructive',
+                      onPress: async () => {
+                        const success = await clearAllData();
+                        if (success) {
+                          Alert.alert('Reset Complete', 'All data has been deleted. Restart the app.');
+                        }
+                      },
+                    },
+                  ]
+                );
+              }}
+            >
+              <Text style={s.settingIcon}>🗑️</Text>
+              <Text style={[s.settingText, { color: Colors.error }]}>Factory Reset</Text>
               <Text style={s.arrow}>›</Text>
             </TouchableOpacity>
 
