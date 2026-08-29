@@ -10,12 +10,16 @@ export interface Exercise {
   isCustom?: boolean;
 }
 
+export type SetType = 'normal' | 'warmup' | 'drop' | 'failure';
+
 export interface WorkoutSet {
   id: string;
   weight: number;
   reps: number;
   completed: boolean;
   restTimer?: number; // seconds
+  type?: SetType;
+  supersetId?: string; // Groups exercises into supersets
 }
 
 export interface WorkoutExercise {
@@ -25,6 +29,8 @@ export interface WorkoutExercise {
   sets: WorkoutSet[];
   notes: string;
   previousBest?: { weight: number; reps: number }; // Ghost data from last workout
+  supersetId?: string; // Groups exercises into supersets
+  supersetLabel?: string; // e.g. 'A', 'B' for superset display
 }
 
 export interface Workout {
@@ -152,7 +158,9 @@ export interface AppState {
   updateSet: (exerciseId: string, setId: string, weight: number, reps: number) => void;
   toggleSetComplete: (exerciseId: string, setId: string) => void;
   deleteSet: (exerciseId: string, setId: string) => void;
+  updateSetType: (exerciseId: string, setId: string, type: SetType) => void;
   updateExerciseNotes: (exerciseId: string, notes: string) => void;
+  toggleSuperset: (exerciseId1: string, exerciseId2: string) => void;
   completeWorkout: () => void;
   cancelWorkout: () => void;
   

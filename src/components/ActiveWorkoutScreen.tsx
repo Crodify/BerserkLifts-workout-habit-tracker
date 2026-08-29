@@ -3,7 +3,16 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal,
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
 import { ExercisePickerModal } from './ExercisePickerModal';
+import { ExerciseDetailScreen } from './ExerciseDetailScreen';
 import { playRestWarningBeep, playRestCompleteBeep, playSetCompleteBeep } from '@/utils/sounds';
+import { SetType } from '@/types';
+
+const SET_TYPE_OPTIONS: { type: SetType; label: string; color: string; short: string }[] = [
+  { type: 'normal', label: 'Normal', color: Colors.textSecondary, short: '' },
+  { type: 'warmup', label: 'Warmup', color: Colors.info, short: 'W' },
+  { type: 'drop', label: 'Drop Set', color: Colors.warning, short: 'D' },
+  { type: 'failure', label: 'Failure', color: Colors.error, short: 'F' },
+];
 
 function formatTimer(seconds: number) {
   const h = Math.floor(seconds / 3600);
@@ -19,10 +28,12 @@ function formatRest(seconds: number) {
 }
 
 export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
-  const { activeWorkout, settings, toggleSetComplete, addSetToExercise, updateSet, addExerciseToWorkout, removeExerciseFromWorkout, completeWorkout, cancelWorkout } = useStore();
+  const { activeWorkout, settings, toggleSetComplete, addSetToExercise, updateSet, updateSetType, addExerciseToWorkout, removeExerciseFromWorkout, toggleSuperset, completeWorkout, cancelWorkout } = useStore();
   const [elapsed, setElapsed] = useState(0);
   const [showPicker, setShowPicker] = useState(false);
   const [showFinish, setShowFinish] = useState(false);
+  const [detailExerciseId, setDetailExerciseId] = useState<string | null>(null);
+  const [setTypeModal, setSetTypeModal] = useState<{ exerciseId: string; setId: string; current: SetType } | null>(null);
 
   // Rest timer state
   const [restRemaining, setRestRemaining] = useState(0);
@@ -40,18 +51,12 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
     return () => clearInterval(id);
   }, [activeWorkout?.startTime]);
 
-  // Cleanup rest timer on unmount
   useEffect(() => {
-    return () => {
-      if (restIntervalRef.current) clearInterval(restIntervalRef.current);
-    };
+    return () => { if (restIntervalRef.current) clearInterval(restIntervalRef.current); };
   }, []);
 
   const dismissRestTimer = useCallback(() => {
-    if (restIntervalRef.current) {
-      clearInterval(restIntervalRef.current);
-      restIntervalRef.current = null;
-    }
+    if (restIntervalRef.current) { clearInterval(restIntervalRef.current); restIntervalRef.current = null; }
     setRestActive(false);
     setRestRemaining(0);
     restProgress.setValue(0);
@@ -62,14 +67,7 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
     setRestRemaining(seconds);
     setRestActive(true);
     restProgress.setValue(1);
-
-    // Animate progress bar from 1 to 0
-    Animated.timing(restProgress, {
-      toValue: 0,
-      duration: seconds * 1000,
-      useNativeDriver: false,
-    }).start();
-
+    Animated.timing(restProgress, { toValue: 0, duration: seconds * 1000, useNativeDriver: false }).start();
     let warned = false;
     restIntervalRef.current = setInterval(() => {
       setRestRemaining(prev => {
@@ -80,11 +78,7 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
           playRestCompleteBeep();
           return 0;
         }
-        // Warn beep at 10 seconds remaining
-        if (prev <= 11 && !warned) {
-          warned = true;
-          playRestWarningBeep();
-        }
+        if (prev <= 11 && !warned) { warned = true; playRestWarningBeep(); }
         return prev - 1;
       });
     }, 1000);
@@ -94,18 +88,13 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
     const exercise = activeWorkout?.exercises.find(e => e.id === exerciseId);
     const set = exercise?.sets.find(s => s.id === setId);
     const wasCompleted = set?.completed;
-
     toggleSetComplete(exerciseId, setId);
-
-    // Confirmation beep
     if (!wasCompleted) {
       playSetCompleteBeep();
-    }
-
-    // If completing a set (not uncompleting) and auto rest timer is on
-    if (!wasCompleted && settings.autoStartRestTimer) {
-      const restSeconds = set?.restTimer || settings.defaultRestTimer;
-      startRestTimer(restSeconds);
+      // Skip rest timer for warmup/drop sets
+      if (settings.autoStartRestTimer && set?.type !== 'warmup' && set?.type !== 'drop') {
+        startRestTimer(set?.restTimer || settings.defaultRestTimer);
+      }
     } else {
       dismissRestTimer();
     }
@@ -119,24 +108,18 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
   const completedSets = activeWorkout.exercises.reduce((sum, ex) => sum + ex.sets.filter(s => s.completed).length, 0);
   const totalSets = activeWorkout.exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
 
-  const handleFinish = () => {
-    dismissRestTimer();
-    completeWorkout();
-    setShowFinish(false);
-    onFinish();
-  };
+  const handleFinish = () => { dismissRestTimer(); completeWorkout(); setShowFinish(false); onFinish(); };
+  const handleDiscard = () => { dismissRestTimer(); cancelWorkout(); setShowFinish(false); onFinish(); };
+  const progressWidth = restProgress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] });
 
-  const handleDiscard = () => {
-    dismissRestTimer();
-    cancelWorkout();
-    setShowFinish(false);
-    onFinish();
-  };
-
-  const progressWidth = restProgress.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0%', '100%'],
-  });
+  // Find superset pairs
+  const supersetGroups = activeWorkout.exercises.reduce<Record<string, string[]>>((acc, ex) => {
+    if (ex.supersetId) {
+      if (!acc[ex.supersetId]) acc[ex.supersetId] = [];
+      acc[ex.supersetId].push(ex.id);
+    }
+    return acc;
+  }, {});
 
   return (
     <View style={s.container}>
@@ -153,57 +136,117 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
       </View>
 
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent}>
-        {activeWorkout.exercises.map(ex => (
-          <View key={ex.id} style={s.exBlock}>
-            <View style={s.exHeader}>
-              <Text style={s.exName}>{ex.exerciseName}</Text>
-              {ex.previousBest && (
-                <Text style={s.ghost}>Last: {ex.previousBest.weight}kg x {ex.previousBest.reps}</Text>
-              )}
-            </View>
-            <View style={s.setRow}>
-              <Text style={[s.setLabel, { width: 40 }]}>SET</Text>
-              <Text style={[s.setLabel, { flex: 1, textAlign: 'center' }]}>KG</Text>
-              <Text style={[s.setLabel, { flex: 1, textAlign: 'center' }]}>REPS</Text>
-              <View style={{ width: 52 }} />
-            </View>
-            {ex.sets.map((set, i) => (
-              <View key={set.id} style={[s.setRow, set.completed && s.setDone]}>
-                <Text style={[s.setNum, set.completed && s.setDoneTxt]}>{i + 1}</Text>
-                <TextInput
-                  style={[s.setInput, set.completed && s.setInputDone]}
-                  keyboardType="decimal-pad"
-                  value={set.weight > 0 ? String(set.weight) : ''}
-                  placeholder="0"
-                  placeholderTextColor={Colors.textMuted}
-                  onChangeText={v => updateSet(ex.id, set.id, parseFloat(v) || 0, set.reps)}
-                />
-                <TextInput
-                  style={[s.setInput, set.completed && s.setInputDone]}
-                  keyboardType="number-pad"
-                  value={set.reps > 0 ? String(set.reps) : ''}
-                  placeholder="0"
-                  placeholderTextColor={Colors.textMuted}
-                  onChangeText={v => updateSet(ex.id, set.id, set.weight, parseInt(v) || 0)}
-                />
+        {activeWorkout.exercises.map(ex => {
+          const isSuperset = !!ex.supersetId;
+          return (
+            <View key={ex.id} style={[s.exBlock, isSuperset && s.exBlockSuperset]}>
+              {/* Exercise Header */}
+              <View style={s.exHeader}>
+                <View style={s.exHeaderLeft}>
+                  {isSuperset && (
+                    <View style={s.supersetBadge}>
+                      <Text style={s.supersetTxt}>{ex.supersetLabel}</Text>
+                    </View>
+                  )}
+                  <TouchableOpacity onPress={() => setDetailExerciseId(ex.exerciseId)}>
+                    <Text style={s.exName}>{ex.exerciseName}</Text>
+                  </TouchableOpacity>
+                </View>
                 <TouchableOpacity
-                  style={[s.checkBtn, set.completed && s.checkDone]}
-                  onPress={() => handleToggleSet(ex.id, set.id)}
+                  style={s.moreBtn}
+                  onPress={() => {
+                    if (isSuperset) {
+                      // Find other exercise in superset to unlink
+                      const pairId = supersetGroups[ex.supersetId!].find(id => id !== ex.id);
+                      if (pairId) toggleSuperset(ex.id, pairId);
+                    } else {
+                      // Find next exercise to superset with
+                      const idx = activeWorkout.exercises.findIndex(e => e.id === ex.id);
+                      const next = activeWorkout.exercises[idx + 1];
+                      if (next && !next.supersetId) toggleSuperset(ex.id, next.id);
+                    }
+                  }}
                 >
-                  <Text style={s.checkTxt}>{set.completed ? '✓' : ''}</Text>
+                  <Text style={s.moreTxt}>{isSuperset ? 'Unlink' : 'Link'}</Text>
                 </TouchableOpacity>
               </View>
-            ))}
-            <View style={s.exActions}>
-              <TouchableOpacity style={s.addSetBtn} onPress={() => addSetToExercise(ex.id)}>
-                <Text style={s.addSetTxt}>+ ADD SET</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => removeExerciseFromWorkout(ex.id)}>
-                <Text style={s.removeTxt}>Remove</Text>
-              </TouchableOpacity>
+
+              {/* Ghost Data */}
+              {ex.previousBest && (
+                <Text style={s.ghost}>Last: {ex.previousBest.weight}kg × {ex.previousBest.reps}</Text>
+              )}
+
+              {/* Column Labels */}
+              <View style={s.colRow}>
+                <Text style={[s.colLabel, { width: 32 }]}>SET</Text>
+                <Text style={[s.colLabel, { flex: 1, textAlign: 'center' }]}>KG</Text>
+                <Text style={[s.colLabel, { flex: 1, textAlign: 'center' }]}>REPS</Text>
+                <View style={{ width: 40 }} />
+              </View>
+
+              {/* Sets */}
+              {ex.sets.map((set, i) => {
+                const setType = (set.type || 'normal') as SetType;
+                const typeInfo = SET_TYPE_OPTIONS.find(t => t.type === setType);
+                const isSpecial = setType !== 'normal';
+                return (
+                  <View key={set.id} style={[s.setRow, set.completed && s.setDone, isSpecial && { borderLeftWidth: 2, borderLeftColor: typeInfo?.color }]}>
+                    {/* Set Number / Type Selector */}
+                    <TouchableOpacity
+                      style={[s.setNumWrap, isSpecial && { backgroundColor: typeInfo?.color + '15' }]}
+                      onPress={() => setSetTypeModal({ exerciseId: ex.id, setId: set.id, current: setType })}
+                    >
+                      {isSpecial ? (
+                        <Text style={[s.setTypeLabel, { color: typeInfo?.color }]}>{typeInfo?.short}</Text>
+                      ) : (
+                        <Text style={[s.setNum, set.completed && s.setDoneTxt]}>{i + 1}</Text>
+                      )}
+                    </TouchableOpacity>
+
+                    {/* Weight Input */}
+                    <TextInput
+                      style={[s.setInput, set.completed && s.setInputDone]}
+                      keyboardType="decimal-pad"
+                      value={set.weight > 0 ? String(set.weight) : ''}
+                      placeholder="0"
+                      placeholderTextColor={Colors.textMuted}
+                      onChangeText={v => updateSet(ex.id, set.id, parseFloat(v) || 0, set.reps)}
+                    />
+
+                    {/* Reps Input */}
+                    <TextInput
+                      style={[s.setInput, set.completed && s.setInputDone]}
+                      keyboardType="number-pad"
+                      value={set.reps > 0 ? String(set.reps) : ''}
+                      placeholder="0"
+                      placeholderTextColor={Colors.textMuted}
+                      onChangeText={v => updateSet(ex.id, set.id, set.weight, parseInt(v) || 0)}
+                    />
+
+                    {/* Checkmark */}
+                    <TouchableOpacity
+                      style={[s.checkBtn, set.completed && s.checkDone]}
+                      onPress={() => handleToggleSet(ex.id, set.id)}
+                    >
+                      <Text style={s.checkTxt}>{set.completed ? '✓' : ''}</Text>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+
+              {/* Actions */}
+              <View style={s.exActions}>
+                <TouchableOpacity style={s.addSetBtn} onPress={() => addSetToExercise(ex.id)}>
+                  <Text style={s.addSetTxt}>+ ADD SET</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => removeExerciseFromWorkout(ex.id)}>
+                  <Text style={s.removeTxt}>Remove</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        ))}
+          );
+        })}
+
         <TouchableOpacity style={s.addExBtn} onPress={() => setShowPicker(true)}>
           <Text style={s.addExTxt}>+ ADD EXERCISE</Text>
         </TouchableOpacity>
@@ -236,9 +279,37 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
       {/* Exercise Picker */}
       <ExercisePickerModal visible={showPicker} onClose={() => setShowPicker(false)} onSelect={(eid) => { addExerciseToWorkout(eid); setShowPicker(false); }} />
 
+      {/* Exercise Detail */}
+      {detailExerciseId && (
+        <ExerciseDetailScreen visible={!!detailExerciseId} exerciseId={detailExerciseId} onClose={() => setDetailExerciseId(null)} />
+      )}
+
+      {/* Set Type Picker */}
+      <Modal visible={!!setTypeModal} transparent animationType="fade" onRequestClose={() => setSetTypeModal(null)}>
+        <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setSetTypeModal(null)}>
+          <View style={s.pickerBox}>
+            <Text style={s.pickerTitle}>SET TYPE</Text>
+            {SET_TYPE_OPTIONS.map(opt => (
+              <TouchableOpacity
+                key={opt.type}
+                style={[s.pickerOpt, setTypeModal?.current === opt.type && { backgroundColor: opt.color + '20' }]}
+                onPress={() => {
+                  if (setTypeModal) updateSetType(setTypeModal.exerciseId, setTypeModal.setId, opt.type);
+                  setSetTypeModal(null);
+                }}
+              >
+                <View style={[s.pickerDot, { backgroundColor: opt.color }]} />
+                <Text style={[s.pickerOptTxt, { color: opt.color }]}>{opt.label}</Text>
+                {setTypeModal?.current === opt.type && <Text style={s.pickerCheck}>✓</Text>}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       {/* Finish Confirm */}
       <Modal visible={showFinish} transparent animationType="fade" onRequestClose={() => setShowFinish(false)}>
-        <View style={s.modal}>
+        <View style={s.modalOverlay2}>
           <View style={s.modalBox}>
             <Text style={s.modalTitle}>FINISH WORKOUT?</Text>
             <Text style={s.modalSub}>{activeWorkout.name}</Text>
@@ -264,32 +335,51 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: Spacing.lg, paddingTop: 50, paddingBottom: Spacing.md, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  cancelBtn: { fontSize: 20, color: Colors.error, fontWeight: '800', width: 40 },
+  cancelBtn: { fontSize: 18, color: Colors.error, fontWeight: '800', width: 40 },
   headerCenter: { alignItems: 'center' },
   timer: { fontSize: FontSize.xxxl, fontWeight: '900', color: Colors.text },
   vol: { fontSize: FontSize.xs, color: Colors.textMuted, marginTop: 2 },
   scroll: { flex: 1 },
-  scrollContent: { padding: Spacing.lg },
-  exBlock: { marginBottom: Spacing.lg, backgroundColor: Colors.surface, borderRadius: BorderRadius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border },
-  exHeader: { marginBottom: Spacing.md },
-  exName: { fontSize: FontSize.lg, fontWeight: '900', color: Colors.text },
-  ghost: { fontSize: FontSize.xs, color: Colors.textSecondary, marginTop: 2, fontStyle: 'italic' },
-  setRow: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.xs },
-  setLabel: { fontSize: 10, fontWeight: '800', color: Colors.textMuted, letterSpacing: 1 },
-  setNum: { width: 40, fontSize: FontSize.sm, fontWeight: '800', color: Colors.textSecondary },
-  setInput: { flex: 1, marginHorizontal: 4, backgroundColor: Colors.surfaceLight, borderRadius: BorderRadius.sm, borderWidth: 1, borderColor: Colors.border, paddingHorizontal: Spacing.sm, paddingVertical: Spacing.xs, color: Colors.text, fontSize: FontSize.md, fontWeight: '700', textAlign: 'center' },
-  setInputDone: { borderColor: Colors.success, opacity: 0.6 },
-  setDone: { opacity: 0.6 },
+  scrollContent: { padding: Spacing.md },
+
+  // Exercise Block
+  exBlock: { marginBottom: Spacing.md, backgroundColor: Colors.surface, borderRadius: BorderRadius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border },
+  exBlockSuperset: { borderLeftWidth: 3, borderLeftColor: Colors.info },
+  exHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.xs },
+  exHeaderLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  supersetBadge: { width: 22, height: 22, borderRadius: 6, backgroundColor: Colors.info, justifyContent: 'center', alignItems: 'center', marginRight: Spacing.sm },
+  supersetTxt: { fontSize: 11, fontWeight: '900', color: Colors.white },
+  exName: { fontSize: FontSize.md, fontWeight: '900', color: Colors.text, textDecorationLine: 'underline' },
+  moreBtn: { paddingHorizontal: Spacing.sm, paddingVertical: Spacing.xs },
+  moreTxt: { fontSize: FontSize.xs, fontWeight: '700', color: Colors.textMuted },
+  ghost: { fontSize: FontSize.xs, color: Colors.textTertiary, marginBottom: Spacing.sm, fontStyle: 'italic' },
+
+  // Column Labels
+  colRow: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.xs, paddingHorizontal: 2 },
+  colLabel: { fontSize: 9, fontWeight: '800', color: Colors.textMuted, letterSpacing: 1 },
+
+  // Set Row
+  setRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4, paddingVertical: 2, borderRadius: BorderRadius.sm },
+  setDone: { opacity: 0.5 },
+  setNumWrap: { width: 32, height: 32, borderRadius: 6, justifyContent: 'center', alignItems: 'center', marginRight: Spacing.sm },
+  setNum: { fontSize: FontSize.sm, fontWeight: '800', color: Colors.textSecondary },
   setDoneTxt: { color: Colors.success },
-  checkBtn: { width: 48, height: 44, borderRadius: BorderRadius.md, borderWidth: 2, borderColor: Colors.borderLight, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.surfaceLight },
-  checkDone: { backgroundColor: Colors.success, borderColor: Colors.success, shadowColor: Colors.success, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.4, shadowRadius: 6, elevation: 4 },
-  checkTxt: { fontSize: 20, color: Colors.white, fontWeight: '900' },
-  exActions: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.sm },
-  addSetBtn: { paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md },
+  setTypeLabel: { fontSize: 12, fontWeight: '900' },
+  setInput: { flex: 1, marginHorizontal: 3, backgroundColor: Colors.surfaceLight, borderRadius: BorderRadius.sm, borderWidth: 1, borderColor: Colors.border, paddingHorizontal: Spacing.sm, paddingVertical: 6, color: Colors.text, fontSize: FontSize.sm, fontWeight: '700', textAlign: 'center' },
+  setInputDone: { borderColor: Colors.success, opacity: 0.6 },
+  checkBtn: { width: 36, height: 32, borderRadius: BorderRadius.sm, borderWidth: 1.5, borderColor: Colors.borderLight, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.surfaceLight, marginLeft: Spacing.sm },
+  checkDone: { backgroundColor: Colors.success, borderColor: Colors.success },
+  checkTxt: { fontSize: 14, color: Colors.white, fontWeight: '900' },
+
+  // Actions
+  exActions: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.sm, paddingTop: Spacing.sm, borderTopWidth: 1, borderTopColor: Colors.border },
+  addSetBtn: { paddingVertical: Spacing.xs, paddingHorizontal: Spacing.sm },
   addSetTxt: { fontSize: FontSize.xs, fontWeight: '800', color: Colors.primary, letterSpacing: 1 },
   removeTxt: { fontSize: FontSize.xs, fontWeight: '700', color: Colors.textMuted },
-  addExBtn: { borderWidth: 1, borderColor: Colors.border, borderStyle: 'dashed', borderRadius: BorderRadius.lg, padding: Spacing.md, alignItems: 'center', marginBottom: Spacing.lg },
+
+  addExBtn: { borderWidth: 1, borderColor: Colors.border, borderStyle: 'dashed', borderRadius: BorderRadius.lg, padding: Spacing.md, alignItems: 'center', marginBottom: Spacing.md },
   addExTxt: { fontSize: FontSize.sm, fontWeight: '800', color: Colors.primary, letterSpacing: 1 },
+
   footer: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: Spacing.lg, paddingBottom: 40, backgroundColor: Colors.background, borderTopWidth: 1, borderTopColor: Colors.border },
   finishBtn: { backgroundColor: Colors.primary, borderRadius: BorderRadius.md, paddingVertical: Spacing.md, alignItems: 'center' },
   finishTxt: { fontSize: FontSize.md, fontWeight: '900', color: Colors.white, letterSpacing: 1 },
@@ -304,8 +394,17 @@ const s = StyleSheet.create({
   restSkipBtn: { backgroundColor: Colors.surfaceLight, paddingHorizontal: Spacing.xl, paddingVertical: Spacing.sm, borderRadius: BorderRadius.sm, borderWidth: 1, borderColor: Colors.border },
   restSkipTxt: { fontSize: FontSize.sm, fontWeight: '900', color: Colors.text, letterSpacing: 1 },
 
+  // Set Type Picker
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
+  pickerBox: { backgroundColor: Colors.backgroundElevated, borderRadius: BorderRadius.xl, padding: Spacing.lg, width: 260, borderWidth: 1, borderColor: Colors.border },
+  pickerTitle: { fontSize: FontSize.md, fontWeight: '900', color: Colors.text, letterSpacing: 1, marginBottom: Spacing.md, textAlign: 'center' },
+  pickerOpt: { flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.md, paddingHorizontal: Spacing.md, borderRadius: BorderRadius.md, marginBottom: Spacing.xs },
+  pickerDot: { width: 8, height: 8, borderRadius: 4, marginRight: Spacing.md },
+  pickerOptTxt: { fontSize: FontSize.md, fontWeight: '700', flex: 1 },
+  pickerCheck: { fontSize: 16, color: Colors.success, fontWeight: '900' },
+
   // Modals
-  modal: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: Spacing.lg },
+  modalOverlay2: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: Spacing.lg },
   modalBox: { backgroundColor: Colors.surface, borderRadius: BorderRadius.xl, padding: Spacing.lg, width: '100%', maxWidth: 360, borderWidth: 1, borderColor: Colors.border },
   modalTitle: { fontSize: FontSize.xl, fontWeight: '900', color: Colors.text, textAlign: 'center', marginBottom: Spacing.xs },
   modalSub: { fontSize: FontSize.md, color: Colors.textSecondary, textAlign: 'center', marginBottom: Spacing.xs },
