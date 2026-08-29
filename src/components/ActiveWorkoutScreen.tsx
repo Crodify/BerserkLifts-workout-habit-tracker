@@ -37,6 +37,7 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
   const [detailExerciseId, setDetailExerciseId] = useState<string | null>(null);
   const [setTypeModal, setSetTypeModal] = useState<{ exerciseId: string; setId: string; current: SetType; setNumber: number } | null>(null);
   const [exerciseRestModal, setExerciseRestModal] = useState<{ exerciseId: string; current: number } | null>(null);
+  const [quickRestPicker, setQuickRestPicker] = useState(false);
 
   const [restRemaining, setRestRemaining] = useState(0);
   const [restActive, setRestActive] = useState(false);
@@ -136,7 +137,7 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
           <Text style={s.collapseIcon}>⌄</Text>
         </TouchableOpacity>
         <Text style={s.headerTitle}>Log Workout</Text>
-        <TouchableOpacity style={s.restTimerHeaderBtn} onPress={() => startRestTimer(settings.defaultRestTimer)}>
+        <TouchableOpacity style={s.restTimerHeaderBtn} onPress={() => setQuickRestPicker(true)}>
           <Text style={s.restTimerHeaderIcon}>⏱</Text>
           <Text style={s.restTimerHeaderText}>{formatRest(settings.defaultRestTimer)}</Text>
         </TouchableOpacity>
@@ -427,6 +428,35 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
                 <Text style={[s.pickerOptTxt, { color: Colors.error }]}>Reset to default</Text>
               </TouchableOpacity>
             )}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Quick Rest Timer Picker (from header) */}
+      <Modal visible={quickRestPicker} transparent animationType="fade" onRequestClose={() => setQuickRestPicker(false)}>
+        <TouchableOpacity style={s.modalBg} activeOpacity={1} onPress={() => setQuickRestPicker(false)}>
+          <View style={s.pickerBox} onStartShouldSetResponder={() => true}>
+            <Text style={s.pickerTitle}>START REST TIMER</Text>
+            <Text style={s.pickerSub}>Pick duration and start</Text>
+            {REST_OPTIONS.map(sec => (
+              <TouchableOpacity
+                key={sec}
+                style={[s.pickerOpt, settings.defaultRestTimer === sec && s.pickerOptActive]}
+                onPress={() => { setQuickRestPicker(false); startRestTimer(sec); }}
+              >
+                <Text style={[s.pickerOptTxt, settings.defaultRestTimer === sec && s.pickerOptTxtActive]}>
+                  {formatRest(sec)}{settings.defaultRestTimer === sec ? '  (default)' : ''}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            <View style={{ height: Spacing.sm }} />
+            <Text style={[s.pickerSub, { marginTop: Spacing.sm }]}>Or start with default</Text>
+            <TouchableOpacity
+              style={[s.pickerOpt, { backgroundColor: Colors.primary }]}
+              onPress={() => { setQuickRestPicker(false); startRestTimer(settings.defaultRestTimer); }}
+            >
+              <Text style={[s.pickerOptTxt, { color: Colors.white, fontWeight: '900' }]}>START {formatRest(settings.defaultRestTimer)}</Text>
+            </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>
