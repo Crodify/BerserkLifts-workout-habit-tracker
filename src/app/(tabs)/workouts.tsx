@@ -7,6 +7,7 @@ import { RoutineCardUnfiled } from '@/components/RoutineCardUnfiled';
 import { MoveToFolderModal } from '@/components/MoveToFolderModal';
 import { CreateFolderModal } from '@/components/CreateFolderModal';
 import { CreateRoutineModal } from '@/components/CreateRoutineModal';
+import { ActiveWorkoutScreen } from '@/components/ActiveWorkoutScreen';
 
 export default function WorkoutsScreen() {
   const { routines, folders, exercises, activeWorkout, startWorkout, addRoutine, addFolder, deleteRoutine, deleteFolder, moveRoutineToFolder } = useStore();
@@ -39,6 +40,16 @@ export default function WorkoutsScreen() {
     }
   }, [moveModalRoutine, moveRoutineToFolder]);
 
+  const handleDeleteFolder = useCallback((folderId: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    deleteFolder(folderId);
+  }, [deleteFolder]);
+
+  // If there's an active workout, show the ActiveWorkoutScreen
+  if (activeWorkout) {
+    return <ActiveWorkoutScreen onFinish={() => {}} />;
+  }
+
   return (
     <View style={st.m}>
       <ScrollView style={st.s} contentContainerStyle={st.c}>
@@ -54,12 +65,6 @@ export default function WorkoutsScreen() {
           </View>
           <Text style={st.ar}>→</Text>
         </TouchableOpacity>
-        {activeWorkout && (
-          <TouchableOpacity style={st.ab}>
-            <View style={st.ad} />
-            <Text style={st.at}>ACTIVE: {activeWorkout.name}</Text>
-          </TouchableOpacity>
-        )}
         {inFolders.map(({ folder, routines: fr }) => (
           <FolderCard
             key={folder.id}
@@ -68,7 +73,7 @@ export default function WorkoutsScreen() {
             exercises={exercises}
             onStartRoutine={(rid) => startWorkout(undefined, rid)}
             onMoveRoutine={handleMoveToFolder}
-            onDeleteFolder={() => deleteFolder(folder.id)}
+            onDeleteFolder={() => handleDeleteFolder(folder.id)}
             onDeleteRoutine={(id) => deleteRoutine(id)}
           />
         ))}

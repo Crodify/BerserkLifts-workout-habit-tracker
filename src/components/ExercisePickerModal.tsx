@@ -1,160 +1,62 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
 
-interface ExercisePickerModalProps {
+interface Props {
   visible: boolean;
   onClose: () => void;
+  onSelect: (exerciseId: string) => void;
 }
 
-export function ExercisePickerModal({ visible, onClose }: ExercisePickerModalProps) {
-  const { exercises, addExerciseToWorkout } = useStore();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedMuscle, setSelectedMuscle] = useState<string>('All');
+export function ExercisePickerModal({ visible, onClose, onSelect }: Props) {
+  const { exercises } = useStore();
+  const [search, setSearch] = useState('');
 
-  const muscles = ['All', 'Chest', 'Back', 'Legs', 'Shoulders', 'Arms'];
-
-  const filteredExercises = exercises.filter(exercise => {
-    const matchesSearch = exercise.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesMuscle = selectedMuscle === 'All' || exercise.muscle === selectedMuscle;
-    return matchesSearch && matchesMuscle;
-  });
-
-  const handleSelectExercise = (exerciseId: string) => {
-    addExerciseToWorkout(exerciseId);
-    onClose();
-    setSearchQuery('');
-  };
+  const filtered = exercises.filter(e =>
+    e.name.toLowerCase().includes(search.toLowerCase()) ||
+    e.muscle.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>✕</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>ADD EXERCISE</Text>
-          <View style={{ width: 40 }} />
-        </View>
-
-        <View style={styles.searchContainer}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={s.ov}>
+        <View style={s.modal}>
+          <Text style={s.title}>SELECT EXERCISE</Text>
           <TextInput
-            style={styles.searchInput}
+            style={s.search}
             placeholder="Search exercises..."
             placeholderTextColor={Colors.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
+            value={search}
+            onChangeText={setSearch}
+            autoFocus
           />
+          <ScrollView style={s.list}>
+            {filtered.map(ex => (
+              <TouchableOpacity key={ex.id} style={s.item} onPress={() => { onSelect(ex.id); setSearch(''); }} activeOpacity={0.7}>
+                <Text style={s.name}>{ex.name}</Text>
+                <Text style={s.info}>{ex.muscle} · {ex.equipment}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+          <TouchableOpacity style={s.cancelBtn} onPress={() => { setSearch(''); onClose(); }}>
+            <Text style={s.cancelTxt}>CANCEL</Text>
+          </TouchableOpacity>
         </View>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.muscleFilter}
-          contentContainerStyle={styles.muscleFilterContent}
-        >
-          {muscles.map(muscle => (
-            <TouchableOpacity
-              key={muscle}
-              style={[
-                styles.muscleTag,
-                selectedMuscle === muscle && styles.muscleTagActive,
-              ]}
-              onPress={() => setSelectedMuscle(muscle)}
-            >
-              <Text
-                style={[
-                  styles.muscleTagText,
-                  selectedMuscle === muscle && styles.muscleTagTextActive,
-                ]}
-              >
-                {muscle.toUpperCase()}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        <ScrollView style={styles.exerciseList} contentContainerStyle={styles.exerciseListContent}>
-          {filteredExercises.map(exercise => (
-            <TouchableOpacity
-              key={exercise.id}
-              style={styles.exerciseItem}
-              onPress={() => handleSelectExercise(exercise.id)}
-            >
-              <View style={styles.exerciseInfo}>
-                <Text style={styles.exerciseName}>{exercise.name}</Text>
-                <Text style={styles.exerciseDetails}>
-                  {exercise.muscle} • {exercise.equipment}
-                </Text>
-              </View>
-              <Text style={styles.addIcon}>+</Text>
-            </TouchableOpacity>
-          ))}
-
-          {filteredExercises.length === 0 && (
-            <Text style={styles.emptyText}>No exercises found</Text>
-          )}
-        </ScrollView>
       </View>
     </Modal>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingTop: 60,
-    paddingBottom: Spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  closeButton: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
-  closeButtonText: { fontSize: FontSize.xl, color: Colors.primary, fontWeight: '800' },
-  title: { fontSize: FontSize.lg, fontWeight: '900', color: Colors.text, letterSpacing: 1 },
-  searchContainer: { padding: Spacing.lg },
-  searchInput: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
-    color: Colors.text,
-    fontSize: FontSize.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  muscleFilter: { maxHeight: 50, marginBottom: Spacing.md },
-  muscleFilterContent: { paddingHorizontal: Spacing.lg, gap: Spacing.sm },
-  muscleTag: {
-    backgroundColor: Colors.surface,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  muscleTagActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
-  muscleTagText: { fontSize: FontSize.xs, fontWeight: '800', color: Colors.textSecondary, letterSpacing: 1 },
-  muscleTagTextActive: { color: Colors.white },
-  exerciseList: { flex: 1 },
-  exerciseListContent: { padding: Spacing.lg },
-  exerciseItem: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
-    marginBottom: Spacing.sm,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  exerciseInfo: { flex: 1 },
-  exerciseName: { fontSize: FontSize.md, fontWeight: '800', color: Colors.text, marginBottom: Spacing.xs },
-  exerciseDetails: { fontSize: FontSize.xs, color: Colors.textSecondary },
-  addIcon: { fontSize: 24, color: Colors.primary, fontWeight: '800' },
-  emptyText: { fontSize: FontSize.md, color: Colors.textMuted, textAlign: 'center', marginTop: Spacing.xl },
+const s = StyleSheet.create({
+  ov: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end', padding: Spacing.lg },
+  modal: { backgroundColor: Colors.surface, borderRadius: BorderRadius.xl, padding: Spacing.lg, maxHeight: '75%', borderWidth: 1, borderColor: Colors.border },
+  title: { fontSize: FontSize.lg, fontWeight: '900', color: Colors.text, letterSpacing: 1, marginBottom: Spacing.md },
+  search: { backgroundColor: Colors.surfaceLight, borderRadius: BorderRadius.md, padding: Spacing.md, fontSize: FontSize.md, color: Colors.text, borderWidth: 1, borderColor: Colors.border, marginBottom: Spacing.md },
+  list: { maxHeight: 400 },
+  item: { padding: Spacing.md, borderBottomWidth: 1, borderBottomColor: Colors.border },
+  name: { fontSize: FontSize.md, fontWeight: '700', color: Colors.text },
+  info: { fontSize: FontSize.xs, color: Colors.textMuted, marginTop: 2 },
+  cancelBtn: { padding: Spacing.md, borderRadius: BorderRadius.md, backgroundColor: Colors.surfaceLight, alignItems: 'center', marginTop: Spacing.md },
+  cancelTxt: { fontSize: FontSize.sm, fontWeight: '800', color: Colors.textSecondary, letterSpacing: 1 },
 });
