@@ -4,7 +4,7 @@ import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useAuth } from '@/lib/AuthContext';
 
 export function AuthScreen() {
-  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const { signIn, signUp } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -122,25 +122,6 @@ export function AuthScreen() {
             <Text style={s.submitTxt}>{loading ? 'LOADING...' : isSignUp ? 'SIGN UP' : 'LOG IN'}</Text>
           </TouchableOpacity>
 
-          {/* Divider */}
-          <View style={s.dividerRow}>
-            <View style={s.dividerLine} />
-            <Text style={s.dividerTxt}>OR</Text>
-            <View style={s.dividerLine} />
-          </View>
-
-          {/* Google Sign-In */}
-          <TouchableOpacity
-            style={s.googleBtn}
-            onPress={async () => {
-              const result = await signInWithGoogle();
-              if (result.error) setError(result.error);
-            }}
-          >
-            <Text style={s.googleIcon}>G</Text>
-            <Text style={s.googleTxt}>Continue with Google</Text>
-          </TouchableOpacity>
-
           {/* Toggle */}
           <TouchableOpacity style={s.toggleBtn} onPress={() => { setIsSignUp(!isSignUp); setError(''); }}>
             <Text style={s.toggleTxt}>
@@ -188,14 +169,6 @@ const s = StyleSheet.create({
   toggleBtn: { alignItems: 'center', marginTop: Spacing.lg },
   toggleTxt: { fontSize: FontSize.sm, color: Colors.textMuted },
   toggleBold: { color: Colors.primary, fontWeight: '800' },
-
-  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: Spacing.lg },
-  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.border },
-  dividerTxt: { fontSize: FontSize.xs, fontWeight: '700', color: Colors.textMuted, marginHorizontal: Spacing.md },
-
-  googleBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.surface, borderRadius: BorderRadius.full, paddingVertical: Spacing.md, borderWidth: 1, borderColor: Colors.border, gap: Spacing.sm },
-  googleIcon: { fontSize: 18, fontWeight: '900', color: '#4285F4' },
-  googleTxt: { fontSize: FontSize.sm, fontWeight: '700', color: Colors.text },
 
   footer: { fontSize: FontSize.xs, color: Colors.textMuted, textAlign: 'center', marginTop: Spacing.xl },
 });
