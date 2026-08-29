@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal,
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
 import { ExercisePickerModal } from './ExercisePickerModal';
+import { playRestWarningBeep, playRestCompleteBeep, playSetCompleteBeep } from '@/utils/sounds';
 
 function formatTimer(seconds: number) {
   const h = Math.floor(seconds / 3600);
@@ -69,13 +70,20 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
       useNativeDriver: false,
     }).start();
 
+    let warned = false;
     restIntervalRef.current = setInterval(() => {
       setRestRemaining(prev => {
         if (prev <= 1) {
           if (restIntervalRef.current) clearInterval(restIntervalRef.current);
           restIntervalRef.current = null;
           setRestActive(false);
+          playRestCompleteBeep();
           return 0;
+        }
+        // Warn beep at 10 seconds remaining
+        if (prev <= 11 && !warned) {
+          warned = true;
+          playRestWarningBeep();
         }
         return prev - 1;
       });
@@ -88,6 +96,11 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
     const wasCompleted = set?.completed;
 
     toggleSetComplete(exerciseId, setId);
+
+    // Confirmation beep
+    if (!wasCompleted) {
+      playSetCompleteBeep();
+    }
 
     // If completing a set (not uncompleting) and auto rest timer is on
     if (!wasCompleted && settings.autoStartRestTimer) {
