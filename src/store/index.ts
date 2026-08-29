@@ -13,6 +13,7 @@ import { habitActions } from './habitActions';
 import { measurementActions } from './measurementActions';
 import { settingsActions } from './settingsActions';
 import { utilityActions } from './utilityActions';
+import { challengeActions } from './challengeActions';
 
 export const useStore = create<AppState>()(
   persist(
@@ -39,6 +40,7 @@ export const useStore = create<AppState>()(
       ...measurementActions(set, get),
       ...settingsActions(set, get),
       ...utilityActions(set, get),
+      ...challengeActions(set, get),
     }),
     {
       name: 'arise-storage-v2',
@@ -52,6 +54,7 @@ export const useStore = create<AppState>()(
         exercises: state.exercises,
         personalRecords: state.personalRecords,
         bodyMeasurements: state.bodyMeasurements,
+        challenges: state.challenges,
         settings: state.settings,
       }),
     }

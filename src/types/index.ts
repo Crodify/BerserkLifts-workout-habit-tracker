@@ -122,6 +122,27 @@ export interface Friend {
   totalVolume: number;
 }
 
+export type ChallengeMode = 'workouts' | 'volume' | 'streak' | 'habitCompletion';
+export type ChallengeStatus = 'active' | 'upcoming' | 'completed';
+
+export interface ChallengeParticipant {
+  friendId: string; // 'user' for the current user
+  score: number; // Current progress
+  joinedAt: string;
+}
+
+export interface Challenge {
+  id: string;
+  name: string;
+  mode: ChallengeMode;
+  status: ChallengeStatus;
+  startDate: string;
+  endDate: string;
+  participants: ChallengeParticipant[];
+  createdBy: string;
+  description: string;
+}
+
 export interface ActiveWorkout {
   id: string;
   name: string;
@@ -192,6 +213,14 @@ export interface AppState {
   setDefaultRestTimer: (seconds: number) => void;
   setAutoStartRestTimer: (enabled: boolean) => void;
   
+  // Challenge Actions
+  challenges: Challenge[];
+  createChallenge: (challenge: Omit<Challenge, 'id' | 'participants' | 'status'>) => void;
+  joinChallenge: (challengeId: string) => void;
+  leaveChallenge: (challengeId: string) => void;
+  deleteChallenge: (challengeId: string) => void;
+  updateChallengeScores: () => void;
+
   // Utility Actions
   addXP: (amount: number) => void;
   getExerciseHistory: (exerciseId: string) => ExerciseHistory | null;

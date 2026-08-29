@@ -5,6 +5,7 @@ import { useStore } from '@/store';
 import { calculateLevelProgress, getRankColor } from '@/constants/rpg';
 import { formatNumber } from '@/utils';
 import { EmptyState } from '@/components/EmptyState';
+import { ChallengesScreen } from '@/components/ChallengesScreen';
 
 const FadeInView = ({ delay, children }: { delay: number; children: React.ReactNode }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -35,8 +36,11 @@ const FadeInView = ({ delay, children }: { delay: number; children: React.ReactN
 };
 
 export default function DashboardScreen() {
-  const { profile, friends } = useStore();
+  const { profile, friends, challenges, updateChallengeScores } = useStore();
   const levelProgress = calculateLevelProgress(profile.xp);
+  const [showChallenges, setShowChallenges] = React.useState(false);
+
+  const activeChallenges = challenges.filter((c: any) => c.status === 'active');
 
   const allFriends = [
     { ...profile, name: 'You', isUser: true },
@@ -99,9 +103,7 @@ export default function DashboardScreen() {
                 <Text style={styles.statLabel}>STREAK</Text>
               </TouchableOpacity>
             </View>
-          </FadeInView>
-
-          <FadeInView delay={300}>
+          </FadeInView>          <FadeInView delay={300}>
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>LEADERBOARD</Text>
@@ -131,6 +133,41 @@ export default function DashboardScreen() {
               )}
             </View>
           </FadeInView>
+
+          <FadeInView delay={400}>
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>CHALLENGES</Text>
+                <TouchableOpacity onPress={() => setShowChallenges(true)}>
+                  <Text style={styles.sectionTag}>VIEW ALL</Text>
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity style={styles.challengeCard} activeOpacity={0.8} onPress={() => setShowChallenges(true)}>
+                <View style={styles.challengeLeft}>
+                  <Text style={styles.challengeIcon}>🏆</Text>
+                  <View>
+                    <Text style={styles.challengeTitle}>{activeChallenges.length > 0 ? `${activeChallenges.length} Active Challenge${activeChallenges.length > 1 ? 's' : ''}` : 'Start a Challenge'}</Text>
+                    <Text style={styles.challengeSub}>{activeChallenges.length > 0 ? 'Compete with friends' : 'Compete with friends on workout goals'}</Text>
+                  </View>
+                </View>
+                <Text style={styles.challengeArrow}>›</Text>
+              </TouchableOpacity>
+
+              {activeChallenges.slice(0, 2).map((c: any) => (
+                <TouchableOpacity key={c.id} style={styles.challengeMiniCard} activeOpacity={0.8} onPress={() => setShowChallenges(true)}>
+                  <Text style={styles.challengeMiniIcon}>{c.mode === 'workouts' ? '🏋️' : c.mode === 'volume' ? '📊' : c.mode === 'streak' ? '🔥' : '✅'}</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.challengeMiniName}>{c.name}</Text>
+                    <Text style={styles.challengeMiniMode}>{c.mode.charAt(0).toUpperCase() + c.mode.slice(1)}</Text>
+                  </View>
+                  <Text style={styles.challengeMiniParticipants}>{c.participants.length} joined</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </FadeInView>
+
+          <ChallengesScreen visible={showChallenges} onClose={() => setShowChallenges(false)} />
         </>
       )}
     </ScrollView>
@@ -334,5 +371,71 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     fontWeight: '800',
     color: Colors.textSecondary,
+  },
+
+  // Challenges
+  challengeCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  challengeLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  challengeIcon: {
+    fontSize: 28,
+    marginRight: Spacing.md,
+  },
+  challengeTitle: {
+    fontSize: FontSize.sm,
+    fontWeight: '800',
+    color: Colors.text,
+  },
+  challengeSub: {
+    fontSize: FontSize.xs,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  challengeArrow: {
+    fontSize: 22,
+    color: Colors.textMuted,
+  },
+  challengeMiniCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.sm,
+    padding: Spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.xs,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  challengeMiniIcon: {
+    fontSize: 18,
+    marginRight: Spacing.sm,
+  },
+  challengeMiniName: {
+    fontSize: FontSize.xs,
+    fontWeight: '800',
+    color: Colors.text,
+  },
+  challengeMiniMode: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: Colors.textMuted,
+    marginTop: 1,
+  },
+  challengeMiniParticipants: {
+    fontSize: FontSize.xs,
+    fontWeight: '700',
+    color: Colors.primary,
   },
 });
