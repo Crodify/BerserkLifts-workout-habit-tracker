@@ -80,7 +80,7 @@ Copy content from `.agents/specialized/` files into Cline's system prompt:
 
 ### In Freebuff (me):
 ```
-"Switch to UI Designer role. Make the habits tab look like Hevy."
+"Switch to UI Designer role. Make the habits tab look premium and polished."
 "Switch to Frontend Developer. Build the set logging component."
 "Switch to Code Reviewer. Review workouts.tsx for bugs."
 ```

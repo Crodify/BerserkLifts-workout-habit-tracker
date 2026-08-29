@@ -77,7 +77,7 @@ export function OnboardingScreen({ onFinish }: Props) {
             <View style={s.featureList}>
               <View style={s.featureRow}>
                 <Text style={s.featureIcon}>🏋️</Text>
-                <Text style={s.featureText}>Hevy-style workout tracking</Text>
+                <Text style={s.featureText}>Advanced workout tracking</Text>
               </View>
               <View style={s.featureRow}>
                 <Text style={s.featureIcon}>✅</Text>

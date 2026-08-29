@@ -9,7 +9,7 @@
 ## 1. Project Overview
 
 BerserkLifts is a workout habit tracker with RPG gamification.
-- Track workouts with sets, weight, reps (Hevy-style)
+- Track workouts with sets, weight, reps
 - Organize routines into folders
 - Daily habit tracking with streaks
 - XP system, rank badges, leaderboards

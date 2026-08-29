@@ -354,7 +354,7 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
         <ExerciseDetailScreen visible={!!detailExerciseId} exerciseId={detailExerciseId} onClose={() => setDetailExerciseId(null)} />
       )}
 
-      {/* Set Type Picker (Hevy-style bottom sheet) */}
+      {/* Set Type Picker */}
       <Modal visible={!!setTypeModal} transparent animationType="slide" onRequestClose={() => setSetTypeModal(null)}>
         <TouchableOpacity style={s.setTypeOverlay} activeOpacity={1} onPress={() => setSetTypeModal(null)}>
           <View style={s.setTypeSheet} onStartShouldSetResponder={() => true}>
@@ -584,7 +584,7 @@ const s = StyleSheet.create({
   // ── MODALS ──
   modalBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: Spacing.lg },
 
-  // ── SET TYPE PICKER (Hevy-style bottom sheet) ──
+  // ── SET TYPE PICKER ──
   setTypeOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   setTypeSheet: { backgroundColor: Colors.backgroundElevated, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingBottom: 40 },
   setTypeHandle: { width: 36, height: 4, borderRadius: 2, backgroundColor: Colors.borderLight, alignSelf: 'center', marginTop: Spacing.sm, marginBottom: Spacing.md },

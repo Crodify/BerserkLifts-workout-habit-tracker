@@ -1,0 +1,10 @@
+feat: onboarding flow, cleanup unused components, final polish
+
+- New OnboardingScreen: 4-step flow (Welcome → Name/Avatar → Goal → Unit) with animated transitions
+- Onboarding persists to AsyncStorage, only shows for first-time users
+- Replaced SplashLoader with OnboardingScreen in root layout
+- Deleted 9 unused components: AnimatedCounter, ExerciseCard, LogWorkoutFlow, LogWorkoutModal, Toast, BodyMap, MusclePickerScreen, SetLoggingScreen, SplashLoader
+- Fixed leaderboard duplicate bug (colliding profile/friend IDs)
+- Fixed streak calendar using useStore.getState() anti-pattern
+- All TypeScript errors: 0
+- Final stats: 48 files, 7422 LOC, 19 components, 13 store modules

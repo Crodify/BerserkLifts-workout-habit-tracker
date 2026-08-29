@@ -1,0 +1,318 @@
+Starting project at C:\Users\Crodify\Desktop\Arise
+Using src/app as the root directory for Expo Router.
+Starting Metro Bundler
+
+Waiting on http://localhost:8082
+
+16 packages may need updating. Run npx expo install --check for details.
+Logs for your project will appear below.
+Web Bundled 468ms node_modules\expo-router\entry.js (815 modules)
+Web  INFO  %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+Web  LOG  Running application "main" with appParams:
+ {"hydrate": undefined, "rootTag": "#root"} 
+Development-level warnings: ON.
+Performance optimizations: OFF.
+Web  WARN  "shadow*" style props are deprecated. Use "boxShadow".
+ LOG  [web] Logs will appear in the browser console
+Web  WARN  Animated: `useNativeDriver` is not supported because the native animated module is missing. Falling back to JS-based animation. To resolve this, add `RCTAnimation` module to this app, or remove `useNativeDriver`. Make sure to run `bundle exec pod install` first. Read more about autolinking: https://github.com/react-native-community/cli/blob/master/docs/autolinking.md
+Web  WARN  props.pointerEvents is deprecated. Use style.pointerEvents
+Web  ERROR  
+
+Code: setupHMR.ts
+[0m [90m 79 |[39m [36mfunction[39m captureCurrentStack() {
+ [90m 80 |[39m   [90m// If you're reading this, look deeper into the call stack to find the actual error source.[39m
+[31m[1m>[22m[39m[90m 81 |[39m   [36mreturn[39m [36mnew[39m [33mNamelessError[39m()[33m.[39mstack[33m;[39m
+ [90m    |[39m          [31m[1m^[22m[39m
+ [90m 82 |[39m }
+ [90m 83 |[39m[0m
+Call Stack
+  captureCurrentStack (node_modules\expo\src\async-require\setupHMR.ts:81:10)
+  addErrorStacks (node_modules\expo\src\async-require\setupHMR.ts:59:19)
+  console.level (node_modules\expo\src\async-require\setupHMR.ts:22:48)
+  registerError (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:134:29)
+  console.error (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:59:27)
+  runWithFiberInDEV$argument_1 (node_modules\react-dom\cjs\react-dom-client.development.js:4923:23)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  warnOnInvalidKey (node_modules\react-dom\cjs\react-dom-client.development.js:4922:13)
+  reconcileChildrenArray (node_modules\react-dom\cjs\react-dom-client.development.js:4991:31)
+  reconcileChildFibersImpl (node_modules\react-dom\cjs\react-dom-client.development.js:5311:30)
+  <anonymous> (node_modules\react-dom\cjs\react-dom-client.development.js:5415:33)
+  reconcileChildren (node_modules\react-dom\cjs\react-dom-client.development.js:7738:13)
+  beginWork (node_modules\react-dom\cjs\react-dom-client.development.js:10023:13)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  performUnitOfWork (node_modules\react-dom\cjs\react-dom-client.development.js:15044:22)
+  workLoopSync (node_modules\react-dom\cjs\react-dom-client.development.js:14870:41)
+  renderRootSync (node_modules\react-dom\cjs\react-dom-client.development.js:14850:11)
+  performWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:14334:13)
+  performSyncWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:15946:7)
+  flushSyncWorkAcrossRoots_impl (node_modules\react-dom\cjs\react-dom-client.development.js:15807:21)
+  flushPassiveEffects (node_modules\react-dom\cjs\react-dom-client.development.js:15472:13)
+  scheduleCallback$1$argument_1 (node_modules\react-dom\cjs\react-dom-client.development.js:15324:11)
+  performWorkUntilDeadline (node_modules\react-dom\node_modules\scheduler\cjs\scheduler.development.js:44:48)
+Web Bundled 24ms node_modules\expo-router\entry.js (1 module)
+Web  INFO  %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+Web  LOG  Running application "main" with appParams:
+ {"hydrate": undefined, "rootTag": "#root"} 
+Development-level warnings: ON.
+Performance optimizations: OFF.
+Web  WARN  "shadow*" style props are deprecated. Use "boxShadow".
+ LOG  [web] Logs will appear in the browser console
+Web  WARN  Animated: `useNativeDriver` is not supported because the native animated module is missing. Falling back to JS-based animation. To resolve this, add `RCTAnimation` module to this app, or remove `useNativeDriver`. Make sure to run `bundle exec pod install` first. Read more about autolinking: https://github.com/react-native-community/cli/blob/master/docs/autolinking.md
+Web  WARN  props.pointerEvents is deprecated. Use style.pointerEvents
+Web  ERROR  
+
+Code: setupHMR.ts
+[0m [90m 79 |[39m [36mfunction[39m captureCurrentStack() {
+ [90m 80 |[39m   [90m// If you're reading this, look deeper into the call stack to find the actual error source.[39m
+[31m[1m>[22m[39m[90m 81 |[39m   [36mreturn[39m [36mnew[39m [33mNamelessError[39m()[33m.[39mstack[33m;[39m
+ [90m    |[39m          [31m[1m^[22m[39m
+ [90m 82 |[39m }
+ [90m 83 |[39m[0m
+Call Stack
+  captureCurrentStack (node_modules\expo\src\async-require\setupHMR.ts:81:10)
+  addErrorStacks (node_modules\expo\src\async-require\setupHMR.ts:59:19)
+  console.level (node_modules\expo\src\async-require\setupHMR.ts:22:48)
+  registerError (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:134:29)
+  console.error (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:59:27)
+  runWithFiberInDEV$argument_1 (node_modules\react-dom\cjs\react-dom-client.development.js:4923:23)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  warnOnInvalidKey (node_modules\react-dom\cjs\react-dom-client.development.js:4922:13)
+  reconcileChildrenArray (node_modules\react-dom\cjs\react-dom-client.development.js:4991:31)
+  reconcileChildFibersImpl (node_modules\react-dom\cjs\react-dom-client.development.js:5311:30)
+  <anonymous> (node_modules\react-dom\cjs\react-dom-client.development.js:5415:33)
+  reconcileChildren (node_modules\react-dom\cjs\react-dom-client.development.js:7738:13)
+  beginWork (node_modules\react-dom\cjs\react-dom-client.development.js:10023:13)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  performUnitOfWork (node_modules\react-dom\cjs\react-dom-client.development.js:15044:22)
+  workLoopSync (node_modules\react-dom\cjs\react-dom-client.development.js:14870:41)
+  renderRootSync (node_modules\react-dom\cjs\react-dom-client.development.js:14850:11)
+  performWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:14334:13)
+  performSyncWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:15946:7)
+  flushSyncWorkAcrossRoots_impl (node_modules\react-dom\cjs\react-dom-client.development.js:15807:21)
+  flushPassiveEffects (node_modules\react-dom\cjs\react-dom-client.development.js:15472:13)
+  scheduleCallback$1$argument_1 (node_modules\react-dom\cjs\react-dom-client.development.js:15324:11)
+  performWorkUntilDeadline (node_modules\react-dom\node_modules\scheduler\cjs\scheduler.development.js:44:48)
+Web  ERROR  
+
+Code: setupHMR.ts
+[0m [90m 79 |[39m [36mfunction[39m captureCurrentStack() {
+ [90m 80 |[39m   [90m// If you're reading this, look deeper into the call stack to find the actual error source.[39m
+[31m[1m>[22m[39m[90m 81 |[39m   [36mreturn[39m [36mnew[39m [33mNamelessError[39m()[33m.[39mstack[33m;[39m
+ [90m    |[39m          [31m[1m^[22m[39m
+ [90m 82 |[39m }
+ [90m 83 |[39m[0m
+Call Stack
+  captureCurrentStack (node_modules\expo\src\async-require\setupHMR.ts:81:10)
+  addErrorStacks (node_modules\expo\src\async-require\setupHMR.ts:59:19)
+  console.level (node_modules\expo\src\async-require\setupHMR.ts:22:48)
+  registerError (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:134:29)
+  console.error (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:59:27)
+  runWithFiberInDEV$argument_1 (node_modules\react-dom\cjs\react-dom-client.development.js:4923:23)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  warnOnInvalidKey (node_modules\react-dom\cjs\react-dom-client.development.js:4922:13)
+  reconcileChildrenArray (node_modules\react-dom\cjs\react-dom-client.development.js:4964:23)
+  reconcileChildFibersImpl (node_modules\react-dom\cjs\react-dom-client.development.js:5311:30)
+  <anonymous> (node_modules\react-dom\cjs\react-dom-client.development.js:5415:33)
+  reconcileChildren (node_modules\react-dom\cjs\react-dom-client.development.js:7739:13)
+  beginWork (node_modules\react-dom\cjs\react-dom-client.development.js:10023:13)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  performUnitOfWork (node_modules\react-dom\cjs\react-dom-client.development.js:15044:22)
+  workLoopSync (node_modules\react-dom\cjs\react-dom-client.development.js:14870:41)
+  renderRootSync (node_modules\react-dom\cjs\react-dom-client.development.js:14850:11)
+  performWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:14334:13)
+  performSyncWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:15946:7)
+  flushSyncWorkAcrossRoots_impl (node_modules\react-dom\cjs\react-dom-client.development.js:15807:21)
+  processRootScheduleInMicrotask (node_modules\react-dom\cjs\react-dom-client.development.js:15841:7)
+  scheduleMicrotask$argument_0 (node_modules\react-dom\cjs\react-dom-client.development.js:15962:13)
+Web  ERROR  
+
+Code: setupHMR.ts
+[0m [90m 79 |[39m [36mfunction[39m captureCurrentStack() {
+ [90m 80 |[39m   [90m// If you're reading this, look deeper into the call stack to find the actual error source.[39m
+[31m[1m>[22m[39m[90m 81 |[39m   [36mreturn[39m [36mnew[39m [33mNamelessError[39m()[33m.[39mstack[33m;[39m
+ [90m    |[39m          [31m[1m^[22m[39m
+ [90m 82 |[39m }
+ [90m 83 |[39m[0m
+Call Stack
+  captureCurrentStack (node_modules\expo\src\async-require\setupHMR.ts:81:10)
+  addErrorStacks (node_modules\expo\src\async-require\setupHMR.ts:59:19)
+  console.level (node_modules\expo\src\async-require\setupHMR.ts:22:48)
+  registerError (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:134:29)
+  console.error (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:59:27)
+  runWithFiberInDEV$argument_1 (node_modules\react-dom\cjs\react-dom-client.development.js:4923:23)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  warnOnInvalidKey (node_modules\react-dom\cjs\react-dom-client.development.js:4922:13)
+  reconcileChildrenArray (node_modules\react-dom\cjs\react-dom-client.development.js:4964:23)
+  reconcileChildFibersImpl (node_modules\react-dom\cjs\react-dom-client.development.js:5311:30)
+  <anonymous> (node_modules\react-dom\cjs\react-dom-client.development.js:5415:33)
+  reconcileChildren (node_modules\react-dom\cjs\react-dom-client.development.js:7739:13)
+  beginWork (node_modules\react-dom\cjs\react-dom-client.development.js:10023:13)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  performUnitOfWork (node_modules\react-dom\cjs\react-dom-client.development.js:15044:22)
+  workLoopSync (node_modules\react-dom\cjs\react-dom-client.development.js:14870:41)
+  renderRootSync (node_modules\react-dom\cjs\react-dom-client.development.js:14850:11)
+  performWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:14334:13)
+  performSyncWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:15946:7)
+  flushSyncWorkAcrossRoots_impl (node_modules\react-dom\cjs\react-dom-client.development.js:15807:21)
+  processRootScheduleInMicrotask (node_modules\react-dom\cjs\react-dom-client.development.js:15841:7)
+  scheduleMicrotask$argument_0 (node_modules\react-dom\cjs\react-dom-client.development.js:15962:13)
+Web  ERROR  
+
+Code: setupHMR.ts
+[0m [90m 79 |[39m [36mfunction[39m captureCurrentStack() {
+ [90m 80 |[39m   [90m// If you're reading this, look deeper into the call stack to find the actual error source.[39m
+[31m[1m>[22m[39m[90m 81 |[39m   [36mreturn[39m [36mnew[39m [33mNamelessError[39m()[33m.[39mstack[33m;[39m
+ [90m    |[39m          [31m[1m^[22m[39m
+ [90m 82 |[39m }
+ [90m 83 |[39m[0m
+Call Stack
+  captureCurrentStack (node_modules\expo\src\async-require\setupHMR.ts:81:10)
+  addErrorStacks (node_modules\expo\src\async-require\setupHMR.ts:59:19)
+  console.level (node_modules\expo\src\async-require\setupHMR.ts:22:48)
+  registerError (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:134:29)
+  console.error (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:59:27)
+  runWithFiberInDEV$argument_1 (node_modules\react-dom\cjs\react-dom-client.development.js:4923:23)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  warnOnInvalidKey (node_modules\react-dom\cjs\react-dom-client.development.js:4922:13)
+  reconcileChildrenArray (node_modules\react-dom\cjs\react-dom-client.development.js:4964:23)
+  reconcileChildFibersImpl (node_modules\react-dom\cjs\react-dom-client.development.js:5311:30)
+  <anonymous> (node_modules\react-dom\cjs\react-dom-client.development.js:5415:33)
+  reconcileChildren (node_modules\react-dom\cjs\react-dom-client.development.js:7739:13)
+  beginWork (node_modules\react-dom\cjs\react-dom-client.development.js:10023:13)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  performUnitOfWork (node_modules\react-dom\cjs\react-dom-client.development.js:15044:22)
+  workLoopSync (node_modules\react-dom\cjs\react-dom-client.development.js:14870:41)
+  renderRootSync (node_modules\react-dom\cjs\react-dom-client.development.js:14850:11)
+  performWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:14334:13)
+  performSyncWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:15946:7)
+  flushSyncWorkAcrossRoots_impl (node_modules\react-dom\cjs\react-dom-client.development.js:15807:21)
+  processRootScheduleInMicrotask (node_modules\react-dom\cjs\react-dom-client.development.js:15841:7)
+  scheduleMicrotask$argument_0 (node_modules\react-dom\cjs\react-dom-client.development.js:15962:13)
+Web  ERROR  
+
+Code: setupHMR.ts
+[0m [90m 79 |[39m [36mfunction[39m captureCurrentStack() {
+ [90m 80 |[39m   [90m// If you're reading this, look deeper into the call stack to find the actual error source.[39m
+[31m[1m>[22m[39m[90m 81 |[39m   [36mreturn[39m [36mnew[39m [33mNamelessError[39m()[33m.[39mstack[33m;[39m
+ [90m    |[39m          [31m[1m^[22m[39m
+ [90m 82 |[39m }
+ [90m 83 |[39m[0m
+Call Stack
+  captureCurrentStack (node_modules\expo\src\async-require\setupHMR.ts:81:10)
+  addErrorStacks (node_modules\expo\src\async-require\setupHMR.ts:59:19)
+  console.level (node_modules\expo\src\async-require\setupHMR.ts:22:48)
+  registerError (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:134:29)
+  console.error (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:59:27)
+  runWithFiberInDEV$argument_1 (node_modules\react-dom\cjs\react-dom-client.development.js:4923:23)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  warnOnInvalidKey (node_modules\react-dom\cjs\react-dom-client.development.js:4922:13)
+  reconcileChildrenArray (node_modules\react-dom\cjs\react-dom-client.development.js:4964:23)
+  reconcileChildFibersImpl (node_modules\react-dom\cjs\react-dom-client.development.js:5311:30)
+  <anonymous> (node_modules\react-dom\cjs\react-dom-client.development.js:5415:33)
+  reconcileChildren (node_modules\react-dom\cjs\react-dom-client.development.js:7739:13)
+  beginWork (node_modules\react-dom\cjs\react-dom-client.development.js:10023:13)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  performUnitOfWork (node_modules\react-dom\cjs\react-dom-client.development.js:15044:22)
+  workLoopSync (node_modules\react-dom\cjs\react-dom-client.development.js:14870:41)
+  renderRootSync (node_modules\react-dom\cjs\react-dom-client.development.js:14850:11)
+  performWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:14334:13)
+  performSyncWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:15946:7)
+  flushSyncWorkAcrossRoots_impl (node_modules\react-dom\cjs\react-dom-client.development.js:15807:21)
+  processRootScheduleInMicrotask (node_modules\react-dom\cjs\react-dom-client.development.js:15841:7)
+  scheduleMicrotask$argument_0 (node_modules\react-dom\cjs\react-dom-client.development.js:15962:13)
+Web  ERROR  
+
+Code: setupHMR.ts
+[0m [90m 79 |[39m [36mfunction[39m captureCurrentStack() {
+ [90m 80 |[39m   [90m// If you're reading this, look deeper into the call stack to find the actual error source.[39m
+[31m[1m>[22m[39m[90m 81 |[39m   [36mreturn[39m [36mnew[39m [33mNamelessError[39m()[33m.[39mstack[33m;[39m
+ [90m    |[39m          [31m[1m^[22m[39m
+ [90m 82 |[39m }
+ [90m 83 |[39m[0m
+Call Stack
+  captureCurrentStack (node_modules\expo\src\async-require\setupHMR.ts:81:10)
+  addErrorStacks (node_modules\expo\src\async-require\setupHMR.ts:59:19)
+  console.level (node_modules\expo\src\async-require\setupHMR.ts:22:48)
+  registerError (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:134:29)
+  console.error (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:59:27)
+  runWithFiberInDEV$argument_1 (node_modules\react-dom\cjs\react-dom-client.development.js:4923:23)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  warnOnInvalidKey (node_modules\react-dom\cjs\react-dom-client.development.js:4922:13)
+  reconcileChildrenArray (node_modules\react-dom\cjs\react-dom-client.development.js:4964:23)
+  reconcileChildFibersImpl (node_modules\react-dom\cjs\react-dom-client.development.js:5311:30)
+  <anonymous> (node_modules\react-dom\cjs\react-dom-client.development.js:5415:33)
+  reconcileChildren (node_modules\react-dom\cjs\react-dom-client.development.js:7739:13)
+  beginWork (node_modules\react-dom\cjs\react-dom-client.development.js:10023:13)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  performUnitOfWork (node_modules\react-dom\cjs\react-dom-client.development.js:15044:22)
+  workLoopSync (node_modules\react-dom\cjs\react-dom-client.development.js:14870:41)
+  renderRootSync (node_modules\react-dom\cjs\react-dom-client.development.js:14850:11)
+  performWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:14334:13)
+  performSyncWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:15946:7)
+  flushSyncWorkAcrossRoots_impl (node_modules\react-dom\cjs\react-dom-client.development.js:15807:21)
+  processRootScheduleInMicrotask (node_modules\react-dom\cjs\react-dom-client.development.js:15841:7)
+  scheduleMicrotask$argument_0 (node_modules\react-dom\cjs\react-dom-client.development.js:15962:13)
+Web  ERROR  
+
+Code: setupHMR.ts
+[0m [90m 79 |[39m [36mfunction[39m captureCurrentStack() {
+ [90m 80 |[39m   [90m// If you're reading this, look deeper into the call stack to find the actual error source.[39m
+[31m[1m>[22m[39m[90m 81 |[39m   [36mreturn[39m [36mnew[39m [33mNamelessError[39m()[33m.[39mstack[33m;[39m
+ [90m    |[39m          [31m[1m^[22m[39m
+ [90m 82 |[39m }
+ [90m 83 |[39m[0m
+Call Stack
+  captureCurrentStack (node_modules\expo\src\async-require\setupHMR.ts:81:10)
+  addErrorStacks (node_modules\expo\src\async-require\setupHMR.ts:59:19)
+  console.level (node_modules\expo\src\async-require\setupHMR.ts:22:48)
+  registerError (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:134:29)
+  console.error (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:59:27)
+  runWithFiberInDEV$argument_1 (node_modules\react-dom\cjs\react-dom-client.development.js:4923:23)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  warnOnInvalidKey (node_modules\react-dom\cjs\react-dom-client.development.js:4922:13)
+  reconcileChildrenArray (node_modules\react-dom\cjs\react-dom-client.development.js:4964:23)
+  reconcileChildFibersImpl (node_modules\react-dom\cjs\react-dom-client.development.js:5311:30)
+  <anonymous> (node_modules\react-dom\cjs\react-dom-client.development.js:5415:33)
+  reconcileChildren (node_modules\react-dom\cjs\react-dom-client.development.js:7739:13)
+  beginWork (node_modules\react-dom\cjs\react-dom-client.development.js:10023:13)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  performUnitOfWork (node_modules\react-dom\cjs\react-dom-client.development.js:15044:22)
+  workLoopSync (node_modules\react-dom\cjs\react-dom-client.development.js:14870:41)
+  renderRootSync (node_modules\react-dom\cjs\react-dom-client.development.js:14850:11)
+  performWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:14334:13)
+  performSyncWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:15946:7)
+  flushSyncWorkAcrossRoots_impl (node_modules\react-dom\cjs\react-dom-client.development.js:15807:21)
+  processRootScheduleInMicrotask (node_modules\react-dom\cjs\react-dom-client.development.js:15841:7)
+  scheduleMicrotask$argument_0 (node_modules\react-dom\cjs\react-dom-client.development.js:15962:13)
+Web  ERROR  
+
+Code: setupHMR.ts
+[0m [90m 79 |[39m [36mfunction[39m captureCurrentStack() {
+ [90m 80 |[39m   [90m// If you're reading this, look deeper into the call stack to find the actual error source.[39m
+[31m[1m>[22m[39m[90m 81 |[39m   [36mreturn[39m [36mnew[39m [33mNamelessError[39m()[33m.[39mstack[33m;[39m
+ [90m    |[39m          [31m[1m^[22m[39m
+ [90m 82 |[39m }
+ [90m 83 |[39m[0m
+Call Stack
+  captureCurrentStack (node_modules\expo\src\async-require\setupHMR.ts:81:10)
+  addErrorStacks (node_modules\expo\src\async-require\setupHMR.ts:59:19)
+  console.level (node_modules\expo\src\async-require\setupHMR.ts:22:48)
+  registerError (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:134:29)
+  console.error (node_modules\expo-router\node_modules\@expo\metro-runtime\src\error-overlay\LogBox.web.ts:59:27)
+  runWithFiberInDEV$argument_1 (node_modules\react-dom\cjs\react-dom-client.development.js:4923:23)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  warnOnInvalidKey (node_modules\react-dom\cjs\react-dom-client.development.js:4922:13)
+  reconcileChildrenArray (node_modules\react-dom\cjs\react-dom-client.development.js:4964:23)
+  reconcileChildFibersImpl (node_modules\react-dom\cjs\react-dom-client.development.js:5311:30)
+  <anonymous> (node_modules\react-dom\cjs\react-dom-client.development.js:5415:33)
+  reconcileChildren (node_modules\react-dom\cjs\react-dom-client.development.js:7739:13)
+  beginWork (node_modules\react-dom\cjs\react-dom-client.development.js:10023:13)
+  runWithFiberInDEV (node_modules\react-dom\cjs\react-dom-client.development.js:543:16)
+  performUnitOfWork (node_modules\react-dom\cjs\react-dom-client.development.js:15044:22)
+  workLoopSync (node_modules\react-dom\cjs\react-dom-client.development.js:14870:41)
+  renderRootSync (node_modules\react-dom\cjs\react-dom-client.development.js:14850:11)
+  performWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:14334:13)
+  performSyncWorkOnRoot (node_modules\react-dom\cjs\react-dom-client.development.js:15946:7)
+  flushSyncWorkAcrossRoots_impl (node_modules\react-dom\cjs\react-dom-client.development.js:15807:21)
+  processRootScheduleInMicrotask (node_modules\react-dom\cjs\react-dom-client.development.js:15841:7)
+  scheduleMicrotask$argument_0 (node_modules\react-dom\cjs\react-dom-client.development.js:15962:13)

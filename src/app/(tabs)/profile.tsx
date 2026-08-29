@@ -236,7 +236,7 @@ const st = StyleSheet.create({
   emptyText: { fontSize: FontSize.md, fontWeight: '700', color: Colors.textSecondary },
   emptySub: { fontSize: FontSize.xs, color: Colors.textMuted, marginTop: Spacing.xs },
 
-  // Workout Card (Hevy-style)
+  // Workout Card
   workoutCard: { backgroundColor: Colors.surface, borderRadius: BorderRadius.lg, padding: Spacing.md, marginBottom: Spacing.sm, borderWidth: 1, borderColor: Colors.border },
   wcTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: Spacing.sm },
   wcTopLeft: { flex: 1 },

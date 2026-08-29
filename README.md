@@ -20,7 +20,7 @@
 
 ## 📱 Features
 
-### 🏋️ Workout Tracking (Hevy-style)
+### 🏋️ Workout Tracking
 - **Active Workout Screen** — Timer, volume tracking, set logging with weight & reps
 - **Set Types** — Normal, Warmup (W), Drop Set (D), Failure (F) with color-coded badges
 - **Supersets** — Link exercises together with A/B badges
@@ -138,7 +138,7 @@ src/
 │       ├── progress.tsx     # Stats, charts, PRs
 │       └── profile.tsx      # Profile, settings, recent workouts
 ├── components/
-│   ├── ActiveWorkoutScreen.tsx   # Hevy-style workout logger
+│   ├── ActiveWorkoutScreen.tsx   # Active workout logger
 │   ├── ExerciseDetailScreen.tsx  # Exercise history & PRs
 │   ├── ExercisePickerModal.tsx   # Searchable exercise picker
 │   ├── AddHabitModal.tsx         # Create new habits
@@ -220,7 +220,6 @@ This project is licensed under the MIT License.
 
 ## 🙏 Acknowledgments
 
-- [Hevy](https://hevyapp.com/) — Workout tracking UX inspiration
 - [Expo](https://expo.dev/) — React Native toolchain
 - [Zustand](https://zustand-demo.pmnd.rs/) — State management
 - [Berserk](https://en.wikipedia.org/wiki/Berserk_(manga)) — Theme inspiration
