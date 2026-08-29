@@ -1,20 +1,43 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, LayoutAnimation } from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
 import { FolderCard } from '@/components/FolderCard';
-import { RoutineCard } from '@/components/RoutineCard';
+import { RoutineCardUnfiled } from '@/components/RoutineCardUnfiled';
+import { MoveToFolderModal } from '@/components/MoveToFolderModal';
 import { CreateFolderModal } from '@/components/CreateFolderModal';
 import { CreateRoutineModal } from '@/components/CreateRoutineModal';
 
 export default function WorkoutsScreen() {
-  const { routines, folders, exercises, activeWorkout, startWorkout, addRoutine, addFolder, deleteRoutine, deleteFolder } = useStore();
+  const { routines, folders, exercises, activeWorkout, startWorkout, addRoutine, addFolder, deleteRoutine, deleteFolder, moveRoutineToFolder } = useStore();
   const [showCF, setShowCF] = useState(false);
   const [showCR, setShowCR] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [moveModalRoutine, setMoveModalRoutine] = useState<{ id: string; name: string; folderId: string | null } | null>(null);
 
   const inFolders = folders.map(f => ({ folder: f, routines: routines.filter(r => r.folderId === f.id) }));
   const unfiled = routines.filter(r => !r.folderId);
+
+  const handleMoveToFolder = useCallback((routineId: string) => {
+    const routine = routines.find(r => r.id === routineId);
+    if (routine) {
+      setMoveModalRoutine({ id: routine.id, name: routine.name, folderId: routine.folderId });
+    }
+  }, [routines]);
+
+  const handleMoveConfirm = useCallback((folderId: string) => {
+    if (moveModalRoutine && moveRoutineToFolder) {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      moveRoutineToFolder(moveModalRoutine.id, folderId);
+    }
+  }, [moveModalRoutine, moveRoutineToFolder]);
+
+  const handleRemoveFromFolder = useCallback(() => {
+    if (moveModalRoutine && moveRoutineToFolder) {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      moveRoutineToFolder(moveModalRoutine.id, null);
+    }
+  }, [moveModalRoutine, moveRoutineToFolder]);
 
   return (
     <View style={st.m}>
@@ -24,9 +47,12 @@ export default function WorkoutsScreen() {
           <Text style={st.t}>WORKOUTS</Text>
         </View>
         <TouchableOpacity style={st.eb} onPress={() => startWorkout('Quick Workout')} activeOpacity={0.7}>
-          <Text style={st.ei}>\u26A1</Text>
-          <View style={st.ebf}><Text style={st.ebt}>START EMPTY WORKOUT</Text><Text style={st.ebs}>Begin training without a template</Text></View>
-          <Text style={st.ar}>\u2192</Text>
+          <Text style={st.ei}>⚡</Text>
+          <View style={st.ebf}>
+            <Text style={st.ebt}>START EMPTY WORKOUT</Text>
+            <Text style={st.ebs}>Begin training without a template</Text>
+          </View>
+          <Text style={st.ar}>→</Text>
         </TouchableOpacity>
         {activeWorkout && (
           <TouchableOpacity style={st.ab}>
@@ -35,19 +61,39 @@ export default function WorkoutsScreen() {
           </TouchableOpacity>
         )}
         {inFolders.map(({ folder, routines: fr }) => (
-          <FolderCard key={folder.id} folder={folder} routines={fr} exercises={exercises} onStartRoutine={(rid) => { startWorkout(undefined, rid); }} onDeleteFolder={() => deleteFolder(folder.id)} onDeleteRoutine={(id) => deleteRoutine(id)} />
+          <FolderCard
+            key={folder.id}
+            folder={folder}
+            routines={fr}
+            exercises={exercises}
+            onStartRoutine={(rid) => startWorkout(undefined, rid)}
+            onMoveRoutine={handleMoveToFolder}
+            onDeleteFolder={() => deleteFolder(folder.id)}
+            onDeleteRoutine={(id) => deleteRoutine(id)}
+          />
         ))}
         {unfiled.length > 0 && (
-          <View style={st.sec}>
-            <Text style={st.st}>ROUTINES</Text>
+          <View style={st.savedSection}>
+            <View style={st.savedHeader}>
+              <Text style={st.savedTitle}>MY SAVED ROUTINES</Text>
+              <Text style={st.savedCount}>{unfiled.length}</Text>
+            </View>
+            <Text style={st.savedHint}>Tap ⋯ to move to a folder</Text>
             {unfiled.map(r => (
-              <RoutineCard key={r.id} routine={r} exercises={exercises} onStart={() => startWorkout(undefined, r.id)} onDelete={() => deleteRoutine(r.id)} />
+              <RoutineCardUnfiled
+                key={r.id}
+                routine={r}
+                exercises={exercises}
+                onStart={() => startWorkout(undefined, r.id)}
+                onMoveToFolder={() => handleMoveToFolder(r.id)}
+                onDelete={() => deleteRoutine(r.id)}
+              />
             ))}
           </View>
         )}
         {routines.length === 0 && (
           <View style={st.em}>
-            <Text style={st.emI}>\uD83D\uDCCB</Text>
+            <Text style={st.emI}>📋</Text>
             <Text style={st.emT}>NO ROUTINES YET</Text>
             <Text style={st.emX}>Create your first routine to quickly start workouts.</Text>
           </View>
@@ -60,13 +106,28 @@ export default function WorkoutsScreen() {
         </TouchableOpacity>
         {showMenu && (
           <View style={st.fm}>
-            <TouchableOpacity style={st.fmi} onPress={() => { setShowMenu(false); setShowCR(true); }}><Text style={st.fmt}>New Routine</Text></TouchableOpacity>
-            <TouchableOpacity style={st.fmi} onPress={() => { setShowMenu(false); setShowCF(true); }}><Text style={st.fmt}>New Folder</Text></TouchableOpacity>
+            <TouchableOpacity style={st.fmi} onPress={() => { setShowMenu(false); setShowCR(true); }}>
+              <Text style={st.fmt}>New Routine</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={st.fmi} onPress={() => { setShowMenu(false); setShowCF(true); }}>
+              <Text style={st.fmt}>New Folder</Text>
+            </TouchableOpacity>
           </View>
         )}
       </View>
       <CreateFolderModal visible={showCF} onClose={() => setShowCF(false)} onCreate={(n, c) => addFolder(n, c)} />
       <CreateRoutineModal visible={showCR} onClose={() => setShowCR(false)} onCreate={(n, el, fid) => addRoutine({ name: n, exercises: el, folderId: fid })} exercises={exercises} folders={folders} />
+      {moveModalRoutine && (
+        <MoveToFolderModal
+          visible={!!moveModalRoutine}
+          routineName={moveModalRoutine.name}
+          folders={folders}
+          currentFolderId={moveModalRoutine.folderId}
+          onClose={() => setMoveModalRoutine(null)}
+          onMove={handleMoveConfirm}
+          onRemoveFromFolder={handleRemoveFromFolder}
+        />
+      )}
     </View>
   );
 }
@@ -87,8 +148,11 @@ const st = StyleSheet.create({
   ab: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(34, 197, 94, 0.15)', borderRadius: BorderRadius.md, padding: Spacing.md, marginBottom: Spacing.lg, borderWidth: 1, borderColor: '#22C55E' },
   ad: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22C55E', marginRight: Spacing.sm },
   at: { flex: 1, fontSize: FontSize.xs, fontWeight: '800', color: '#22C55E', letterSpacing: 0.5 },
-  sec: { marginBottom: Spacing.lg },
-  st: { fontSize: FontSize.sm, fontWeight: '900', color: Colors.textMuted, letterSpacing: 1, marginBottom: Spacing.md },
+  savedSection: { marginBottom: Spacing.lg },
+  savedHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.xs },
+  savedTitle: { fontSize: FontSize.sm, fontWeight: '900', color: Colors.text, letterSpacing: 1 },
+  savedCount: { fontSize: FontSize.xs, fontWeight: '700', color: Colors.textMuted, backgroundColor: Colors.surfaceLight, paddingHorizontal: Spacing.sm, paddingVertical: Spacing.xs, borderRadius: BorderRadius.sm },
+  savedHint: { fontSize: FontSize.xs, color: Colors.textMuted, marginBottom: Spacing.md, fontStyle: 'italic' },
   em: { alignItems: 'center', paddingVertical: Spacing.xxl },
   emI: { fontSize: 48, marginBottom: Spacing.md },
   emT: { fontSize: FontSize.lg, fontWeight: '900', color: Colors.text, letterSpacing: 1, marginBottom: Spacing.sm },

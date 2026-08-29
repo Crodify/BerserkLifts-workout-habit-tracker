@@ -160,6 +160,7 @@ export interface AppState {
   addRoutine: (routine: Omit<Routine, 'id'>) => void;
   updateRoutine: (id: string, routine: Partial<Routine>) => void;
   deleteRoutine: (id: string) => void;
+  moveRoutineToFolder: (routineId: string, folderId: string | null) => void;
   
   // Exercise Actions
   addCustomExercise: (exercise: Omit<Exercise, 'id' | 'isCustom'>) => void;

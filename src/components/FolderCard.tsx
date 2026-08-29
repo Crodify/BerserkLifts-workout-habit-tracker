@@ -9,9 +9,8 @@ interface FolderCardProps {
   routines: Routine[];
   exercises: Exercise[];
   onStartRoutine: (routineId: string) => void;
-  onEditFolder?: () => void;
+  onMoveRoutine?: (routineId: string) => void;
   onDeleteFolder?: () => void;
-  onEditRoutine?: (routineId: string) => void;
   onDeleteRoutine?: (routineId: string) => void;
 }
 
@@ -20,9 +19,8 @@ export function FolderCard({
   routines,
   exercises,
   onStartRoutine,
-  onEditFolder,
+  onMoveRoutine,
   onDeleteFolder,
-  onEditRoutine,
   onDeleteRoutine,
 }: FolderCardProps) {
   const [expanded, setExpanded] = useState(true);
@@ -53,7 +51,7 @@ export function FolderCard({
               routine={routine}
               exercises={exercises}
               onStart={() => onStartRoutine(routine.id)}
-              onEdit={onEditRoutine ? () => onEditRoutine(routine.id) : undefined}
+              onMoveToFolder={onMoveRoutine ? () => onMoveRoutine(routine.id) : undefined}
               onDelete={onDeleteRoutine ? () => onDeleteRoutine(routine.id) : undefined}
             />
           ))}

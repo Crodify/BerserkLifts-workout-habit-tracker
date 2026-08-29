@@ -19,4 +19,12 @@ export const routineActions = (set: any, get: any) => ({
       routines: state.routines.filter((r: any) => r.id !== id),
     }));
   },
+
+  moveRoutineToFolder: (routineId: string, folderId: string | null) => {
+    set((state: any) => ({
+      routines: state.routines.map((r: any) => 
+        r.id === routineId ? { ...r, folderId } : r
+      ),
+    }));
+  },
 });
