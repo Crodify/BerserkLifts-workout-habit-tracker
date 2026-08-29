@@ -35,7 +35,7 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
   const [showPicker, setShowPicker] = useState(false);
   const [showFinish, setShowFinish] = useState(false);
   const [detailExerciseId, setDetailExerciseId] = useState<string | null>(null);
-  const [setTypeModal, setSetTypeModal] = useState<{ exerciseId: string; setId: string; current: SetType } | null>(null);
+  const [setTypeModal, setSetTypeModal] = useState<{ exerciseId: string; setId: string; current: SetType; setNumber: number } | null>(null);
   const [exerciseRestModal, setExerciseRestModal] = useState<{ exerciseId: string; current: number } | null>(null);
 
   const [restRemaining, setRestRemaining] = useState(0);
@@ -245,7 +245,7 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
                       <View style={s.setColNum}>
                         <TouchableOpacity
                           style={[s.setNum, isSpecial && { backgroundColor: typeInfo?.color + '20' }]}
-                          onPress={() => setSetTypeModal({ exerciseId: ex.id, setId: set.id, current: setType })}
+                          onPress={() => setSetTypeModal({ exerciseId: ex.id, setId: set.id, current: setType, setNumber: i + 1 })}
                         >
                           {isSpecial ? (
                             <Text style={[s.setNumTxt, { color: typeInfo?.color }]}>{typeInfo?.short}</Text>
@@ -352,20 +352,23 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
         <ExerciseDetailScreen visible={!!detailExerciseId} exerciseId={detailExerciseId} onClose={() => setDetailExerciseId(null)} />
       )}
 
-      {/* Set Type Picker */}
-      <Modal visible={!!setTypeModal} transparent animationType="fade" onRequestClose={() => setSetTypeModal(null)}>
-        <TouchableOpacity style={s.modalBg} activeOpacity={1} onPress={() => setSetTypeModal(null)}>
-          <View style={s.pickerBox}>
-            <Text style={s.pickerTitle}>SET TYPE</Text>
+      {/* Set Type Picker (Hevy-style bottom sheet) */}
+      <Modal visible={!!setTypeModal} transparent animationType="slide" onRequestClose={() => setSetTypeModal(null)}>
+        <TouchableOpacity style={s.setTypeOverlay} activeOpacity={1} onPress={() => setSetTypeModal(null)}>
+          <View style={s.setTypeSheet} onStartShouldSetResponder={() => true}>
+            <View style={s.setTypeHandle} />
+            <Text style={s.setTypeTitle}>Select Set Type</Text>
             {SET_TYPE_OPTIONS.map(opt => (
               <TouchableOpacity
                 key={opt.type}
-                style={[s.pickerOpt, setTypeModal?.current === opt.type && { backgroundColor: opt.color + '20' }]}
+                style={[s.setTypeRow, setTypeModal?.current === opt.type && { backgroundColor: opt.color + '15' }]}
                 onPress={() => { if (setTypeModal) updateSetType(setTypeModal.exerciseId, setTypeModal.setId, opt.type); setSetTypeModal(null); }}
               >
-                <View style={[s.pickerDot, { backgroundColor: opt.color }]} />
-                <Text style={[s.pickerOptTxt, { color: opt.color }]}>{opt.label}</Text>
-                {setTypeModal?.current === opt.type && <Text style={s.pickerCheck}>✓</Text>}
+                <View style={[s.setTypeBadge, { backgroundColor: opt.color + '20' }]}>
+                  <Text style={[s.setTypeBadgeTxt, { color: opt.color }]}>{opt.short || (opt.type === 'normal' ? String(setTypeModal?.setNumber || 1) : '')}</Text>
+                </View>
+                <Text style={s.setTypeLabel}>{opt.label} Set</Text>
+                <Text style={s.setTypeHelp}>?</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -548,6 +551,18 @@ const s = StyleSheet.create({
 
   // ── MODALS ──
   modalBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: Spacing.lg },
+
+  // ── SET TYPE PICKER (Hevy-style bottom sheet) ──
+  setTypeOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  setTypeSheet: { backgroundColor: Colors.backgroundElevated, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingBottom: 40 },
+  setTypeHandle: { width: 36, height: 4, borderRadius: 2, backgroundColor: Colors.borderLight, alignSelf: 'center', marginTop: Spacing.sm, marginBottom: Spacing.md },
+  setTypeTitle: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.text, textAlign: 'center', marginBottom: Spacing.md, paddingHorizontal: Spacing.lg },
+  setTypeRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderBottomWidth: 1, borderBottomColor: Colors.border },
+  setTypeBadge: { width: 40, height: 40, borderRadius: BorderRadius.sm, justifyContent: 'center', alignItems: 'center', marginRight: Spacing.md },
+  setTypeBadgeTxt: { fontSize: FontSize.lg, fontWeight: '900' },
+  setTypeLabel: { flex: 1, fontSize: FontSize.lg, fontWeight: '600', color: Colors.text },
+  setTypeHelp: { fontSize: FontSize.md, color: Colors.textMuted, fontWeight: '600', width: 24, textAlign: 'center' },
+
   pickerBox: { backgroundColor: Colors.backgroundElevated, borderRadius: BorderRadius.xl, padding: Spacing.lg, width: 280, borderWidth: 1, borderColor: Colors.border },
   pickerTitle: { fontSize: FontSize.md, fontWeight: '900', color: Colors.text, letterSpacing: 1, marginBottom: Spacing.xs, textAlign: 'center' },
   pickerSub: { fontSize: FontSize.xs, color: Colors.textSecondary, textAlign: 'center', marginBottom: Spacing.md },
@@ -555,8 +570,6 @@ const s = StyleSheet.create({
   pickerOptActive: { backgroundColor: Colors.primary },
   pickerOptTxt: { fontSize: FontSize.md, fontWeight: '700', color: Colors.text },
   pickerOptTxtActive: { color: Colors.white },
-  pickerDot: { width: 8, height: 8, borderRadius: 4, marginRight: Spacing.md },
-  pickerCheck: { fontSize: 16, color: Colors.success, fontWeight: '900' },
 
   modalBox: { backgroundColor: Colors.surface, borderRadius: BorderRadius.xl, padding: Spacing.lg, width: '100%', maxWidth: 360, borderWidth: 1, borderColor: Colors.border },
   modalTitle: { fontSize: FontSize.xl, fontWeight: '900', color: Colors.text, textAlign: 'center', marginBottom: Spacing.xs },
