@@ -1,6 +1,16 @@
 import { Workout, PersonalRecord } from '@/types';
 import { calculateWorkoutVolume, generateWorkoutName, calculateWorkoutStreak } from '@/utils/workoutHelpers';
 import { findBest1RM, findMaxWeight } from '@/utils/prCalculations';
+import { calculateLevel, calculateRank } from '@/constants/rpg';
+
+// XP Award System
+const XP_BASE = 50; // Base XP for completing a workout
+const XP_PER_EXERCISE = 15; // XP per exercise completed
+const XP_PER_SET = 5; // XP per set completed
+const XP_VOLUME_BONUS_PER_1000 = 10; // XP per 1000kg volume
+const XP_PR_BONUS = 100; // XP per personal record
+const XP_STREAK_BONUS = 25; // XP per day of current streak
+const XP_HABIT_BONUS = 10; // XP per habit completed
 
 // Part 3: Complete workout
 export const workoutCompletionActions = (set: any, get: any) => ({
@@ -73,11 +83,38 @@ export const workoutCompletionActions = (set: any, get: any) => ({
     const updatedWorkouts = [completedWorkout, ...workouts];
     const streaks = calculateWorkoutStreak(updatedWorkouts);
 
+    // ── Calculate XP ──
+    const completedExercises = activeWorkout.exercises.filter(
+      (e: any) => e.sets.some((s: any) => s.completed)
+    );
+    const completedSetCount = activeWorkout.exercises.reduce(
+      (sum: number, e: any) => sum + e.sets.filter((s: any) => s.completed).length, 0
+    );
+
+    let xpGained = XP_BASE;
+    xpGained += completedExercises.length * XP_PER_EXERCISE;
+    xpGained += completedSetCount * XP_PER_SET;
+    xpGained += Math.floor(totalVolume / 1000) * XP_VOLUME_BONUS_PER_1000;
+    xpGained += newPRs.length * XP_PR_BONUS;
+    xpGained += Math.min(streaks.current, 30) * XP_STREAK_BONUS; // Cap at 30 days
+
+    // ── Apply XP and check level up ──
+    const oldLevel = calculateLevel(profile.xp);
+    const oldRank = calculateRank(oldLevel);
+    const newXP = profile.xp + xpGained;
+    const newLevel = calculateLevel(newXP);
+    const newRank = calculateRank(newLevel);
+    const leveledUp = newLevel > oldLevel;
+    const rankUp = newRank !== oldRank;
+
     set({
       workouts: updatedWorkouts,
       personalRecords: [...personalRecords, ...newPRs],
       profile: {
         ...profile,
+        xp: newXP,
+        level: newLevel,
+        rank: newRank,
         totalWorkouts: profile.totalWorkouts + 1,
         totalVolume: profile.totalVolume + totalVolume,
         currentStreak: streaks.current,
@@ -85,6 +122,22 @@ export const workoutCompletionActions = (set: any, get: any) => ({
         totalPRs: profile.totalPRs + newPRs.length,
       },
       activeWorkout: null,
+      // Store level-up info for popup
+      _lastWorkoutXP: {
+        xpGained,
+        breakdown: {
+          base: XP_BASE,
+          exercises: completedExercises.length * XP_PER_EXERCISE,
+          sets: completedSetCount * XP_PER_SET,
+          volume: Math.floor(totalVolume / 1000) * XP_VOLUME_BONUS_PER_1000,
+          prs: newPRs.length * XP_PR_BONUS,
+          streak: Math.min(streaks.current, 30) * XP_STREAK_BONUS,
+        },
+        leveledUp,
+        rankUp,
+        newLevel,
+        newRank,
+      },
     });
   },
 });

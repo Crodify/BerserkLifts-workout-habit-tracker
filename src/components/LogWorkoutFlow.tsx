@@ -5,6 +5,7 @@ import { useStore } from '@/store';
 import { MusclePickerScreen } from './MusclePickerScreen';
 import { SetLoggingScreen } from './SetLoggingScreen';
 import { LevelUpPopup } from './LevelUpPopup';
+import { Rank } from '@/constants/rpg';
 
 interface LogWorkoutFlowProps {
   visible: boolean;
@@ -56,8 +57,13 @@ export function LogWorkoutFlow({ visible, onClose }: LogWorkoutFlowProps) {
 
       <LevelUpPopup
         visible={showLevelUp}
+        onClose={() => setShowLevelUp(false)}
+        xpGained={0}
+        breakdown={{ base: 0, exercises: 0, sets: 0, volume: 0, prs: 0, streak: 0 }}
+        leveledUp={false}
+        rankUp={false}
         newLevel={levelUpData.newLevel}
-        onFinish={() => setShowLevelUp(false)}
+        newRank={'E'}
       />
     </View>
   );
