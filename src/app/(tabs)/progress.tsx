@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
@@ -25,7 +25,6 @@ function getLast8Weeks(): string[] {
 
 export default function ProgressScreen() {
   const { workouts, profile, personalRecords, exercises } = useStore();
-  const [showPRs, setShowPRs] = useState(true);
 
   // Volume per week for chart
   const last8Weeks = useMemo(() => getLast8Weeks(), []);
