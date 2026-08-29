@@ -50,10 +50,10 @@ export default function DashboardScreen() {
     }
   }, [profile.xp]);
 
-  // Build leaderboard based on tab
+  // Build leaderboard based on tab — use 'user' as ID to avoid collision with friend IDs
   const allFriends = [
-    { ...profile, name: 'You', isUser: true },
-    ...friends,
+    { ...profile, id: '__user__', name: 'You', isUser: true },
+    ...friends.filter((f: any) => f.id !== profile.id), // Remove any friend with same ID as profile
   ];
 
   const sortedFriends = [...allFriends].sort((a, b) => {
@@ -65,12 +65,13 @@ export default function DashboardScreen() {
 
   const hasData = profile.xp > 0 || profile.totalWorkouts > 0;
 
-  // Streak calendar (last 7 days)
+  // Streak calendar (last 7 days) — use workouts from store hook, not getState()
+  const allWorkouts = useStore((s: any) => s.workouts);
   const streakDays = Array.from({ length: 7 }, (_, i) => {
     const date = new Date(Date.now() - (6 - i) * 86400000);
     const dateStr = date.toISOString().split('T')[0];
     const dayName = date.toLocaleDateString('en', { weekday: 'short' });
-    const hasWorkout = useStore.getState().workouts.some((w: any) => w.date.split('T')[0] === dateStr);
+    const hasWorkout = allWorkouts.some((w: any) => w.date.split('T')[0] === dateStr);
     return { dayName, hasWorkout, isToday: i === 6 };
   });
 

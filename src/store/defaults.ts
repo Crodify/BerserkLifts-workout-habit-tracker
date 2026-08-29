@@ -1,7 +1,7 @@
 import { Exercise, Friend } from '@/types';
 
 export const defaultProfile = {
-  id: '1',
+  id: 'user',
   name: 'Hunter',
   avatar: '⚔️',
   xp: 0,
