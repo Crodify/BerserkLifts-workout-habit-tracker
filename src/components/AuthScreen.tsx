@@ -4,13 +4,14 @@ import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useAuth } from '@/lib/AuthContext';
 
 export function AuthScreen() {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithGoogle } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [signUpSuccess, setSignUpSuccess] = useState(false);
 
   const handleSubmit = async () => {
     setError('');
@@ -34,6 +35,7 @@ export function AuthScreen() {
     setLoading(false);
 
     if (result.error) setError(result.error);
+    if (isSignUp && !result.error) setSignUpSuccess(true);
   };
 
   return (
@@ -55,6 +57,15 @@ export function AuthScreen() {
           <Text style={s.cardSub}>
             {isSignUp ? 'Start your training journey' : 'Log in to continue'}
           </Text>
+
+          {/* Sign Up Success */}
+          {signUpSuccess ? (
+            <View style={s.successBox}>
+              <Text style={s.successIcon}>📧</Text>
+              <Text style={s.successTitle}>Check your email!</Text>
+              <Text style={s.successTxt}>We sent a confirmation link to {email}. Click it to verify your account, then come back and log in.</Text>
+            </View>
+          ) : null}
 
           {/* Error */}
           {error ? (
@@ -111,6 +122,25 @@ export function AuthScreen() {
             <Text style={s.submitTxt}>{loading ? 'LOADING...' : isSignUp ? 'SIGN UP' : 'LOG IN'}</Text>
           </TouchableOpacity>
 
+          {/* Divider */}
+          <View style={s.dividerRow}>
+            <View style={s.dividerLine} />
+            <Text style={s.dividerTxt}>OR</Text>
+            <View style={s.dividerLine} />
+          </View>
+
+          {/* Google Sign-In */}
+          <TouchableOpacity
+            style={s.googleBtn}
+            onPress={async () => {
+              const result = await signInWithGoogle();
+              if (result.error) setError(result.error);
+            }}
+          >
+            <Text style={s.googleIcon}>G</Text>
+            <Text style={s.googleTxt}>Continue with Google</Text>
+          </TouchableOpacity>
+
           {/* Toggle */}
           <TouchableOpacity style={s.toggleBtn} onPress={() => { setIsSignUp(!isSignUp); setError(''); }}>
             <Text style={s.toggleTxt}>
@@ -140,6 +170,11 @@ const s = StyleSheet.create({
   cardTitle: { fontSize: FontSize.xl, fontWeight: '900', color: Colors.text, letterSpacing: 1, textAlign: 'center' },
   cardSub: { fontSize: FontSize.sm, color: Colors.textMuted, textAlign: 'center', marginBottom: Spacing.lg },
 
+  successBox: { backgroundColor: Colors.success + '15', borderRadius: BorderRadius.md, padding: Spacing.lg, marginBottom: Spacing.md, borderWidth: 1, borderColor: Colors.success + '40', alignItems: 'center' },
+  successIcon: { fontSize: 32, marginBottom: Spacing.sm },
+  successTitle: { fontSize: FontSize.md, fontWeight: '800', color: Colors.success, marginBottom: Spacing.xs },
+  successTxt: { fontSize: FontSize.sm, color: Colors.textSecondary, textAlign: 'center', lineHeight: 20 },
+
   errorBox: { backgroundColor: Colors.error + '15', borderRadius: BorderRadius.md, padding: Spacing.md, marginBottom: Spacing.md, borderWidth: 1, borderColor: Colors.error + '40' },
   errorTxt: { fontSize: FontSize.sm, color: Colors.error, textAlign: 'center', fontWeight: '600' },
 
@@ -153,6 +188,14 @@ const s = StyleSheet.create({
   toggleBtn: { alignItems: 'center', marginTop: Spacing.lg },
   toggleTxt: { fontSize: FontSize.sm, color: Colors.textMuted },
   toggleBold: { color: Colors.primary, fontWeight: '800' },
+
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: Spacing.lg },
+  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.border },
+  dividerTxt: { fontSize: FontSize.xs, fontWeight: '700', color: Colors.textMuted, marginHorizontal: Spacing.md },
+
+  googleBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.surface, borderRadius: BorderRadius.full, paddingVertical: Spacing.md, borderWidth: 1, borderColor: Colors.border, gap: Spacing.sm },
+  googleIcon: { fontSize: 18, fontWeight: '900', color: '#4285F4' },
+  googleTxt: { fontSize: FontSize.sm, fontWeight: '700', color: Colors.text },
 
   footer: { fontSize: FontSize.xs, color: Colors.textMuted, textAlign: 'center', marginTop: Spacing.xl },
 });
