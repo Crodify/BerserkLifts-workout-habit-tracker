@@ -37,7 +37,6 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
   const [detailExerciseId, setDetailExerciseId] = useState<string | null>(null);
   const [setTypeModal, setSetTypeModal] = useState<{ exerciseId: string; setId: string; current: SetType } | null>(null);
   const [exerciseRestModal, setExerciseRestModal] = useState<{ exerciseId: string; current: number } | null>(null);
-  const [globalRestModal, setGlobalRestModal] = useState(false);
 
   const [restRemaining, setRestRemaining] = useState(0);
   const [restActive, setRestActive] = useState(false);
@@ -137,7 +136,7 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
           <Text style={s.collapseIcon}>⌄</Text>
         </TouchableOpacity>
         <Text style={s.headerTitle}>Log Workout</Text>
-        <TouchableOpacity style={s.restTimerHeaderBtn} onPress={() => setGlobalRestModal(true)}>
+        <TouchableOpacity style={s.restTimerHeaderBtn} onPress={() => startRestTimer(settings.defaultRestTimer)}>
           <Text style={s.restTimerHeaderIcon}>⏱</Text>
           <Text style={s.restTimerHeaderText}>{formatRest(settings.defaultRestTimer)}</Text>
         </TouchableOpacity>
@@ -425,27 +424,6 @@ export function ActiveWorkoutScreen({ onFinish }: { onFinish: () => void }) {
                 <Text style={[s.pickerOptTxt, { color: Colors.error }]}>Reset to default</Text>
               </TouchableOpacity>
             )}
-          </View>
-        </TouchableOpacity>
-      </Modal>
-
-      {/* Global Rest Timer Picker */}
-      <Modal visible={globalRestModal} transparent animationType="fade" onRequestClose={() => setGlobalRestModal(false)}>
-        <TouchableOpacity style={s.modalBg} activeOpacity={1} onPress={() => setGlobalRestModal(false)}>
-          <View style={s.pickerBox}>
-            <Text style={s.pickerTitle}>DEFAULT REST TIMER</Text>
-            <Text style={s.pickerSub}>Applied to all exercises</Text>
-            {REST_OPTIONS.map(sec => (
-              <TouchableOpacity
-                key={sec}
-                style={[s.pickerOpt, settings.defaultRestTimer === sec && s.pickerOptActive]}
-                onPress={() => { useStore.getState().setDefaultRestTimer(sec); setGlobalRestModal(false); }}
-              >
-                <Text style={[s.pickerOptTxt, settings.defaultRestTimer === sec && s.pickerOptTxtActive]}>
-                  {formatRest(sec)}
-                </Text>
-              </TouchableOpacity>
-            ))}
           </View>
         </TouchableOpacity>
       </Modal>
