@@ -31,6 +31,7 @@ export interface WorkoutExercise {
   previousBest?: { weight: number; reps: number }; // Ghost data from last workout
   supersetId?: string; // Groups exercises into supersets
   supersetLabel?: string; // e.g. 'A', 'B' for superset display
+  restTimer?: number; // Per-exercise rest timer override (seconds)
 }
 
 export interface Workout {
