@@ -13,14 +13,13 @@ import { useStore } from '@/store';
 function AppContent() {
   const { session, loading } = useAuth();
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
-  const [syncDone, setSyncDone] = useState(false);
 
   useEffect(() => {
     if (!session) {
       setShowOnboarding(false);
       return;
     }
-    // Check Supabase for existing profile — skip onboarding if profile exists
+    // Check Supabase for existing profile
     import('@/lib/supabase').then(({ supabase }) => {
       supabase
         .from('profiles')
@@ -29,31 +28,27 @@ function AppContent() {
         .single()
         .then(({ data }) => {
           if (data) {
-            // Profile exists — returning user, skip onboarding
-            setShowOnboarding(false);                // Also pull data from Supabase
-                import('@/lib/syncUtils').then(({ pullAllFromSupabase }) => {
-                  pullAllFromSupabase(session.user.id).then(pulled => {
-                    if (pulled.profile) {
-                      useStore.setState({ profile: pulled.profile });
-                    }
+            // Returning user — skip onboarding, pull data in background
+            setShowOnboarding(false);
+            import('@/lib/syncUtils').then(({ pullAllFromSupabase }) => {
+              pullAllFromSupabase(session.user.id).then(pulled => {
+                if (pulled.profile) useStore.setState({ profile: pulled.profile });
                 if (pulled.workouts.length > 0) useStore.setState({ workouts: pulled.workouts });
                 if (pulled.habits.length > 0) useStore.setState({ habits: pulled.habits });
                 if (pulled.routines.length > 0) useStore.setState({ routines: pulled.routines });
                 if (pulled.folders.length > 0) useStore.setState({ folders: pulled.folders });
                 if (pulled.settings) useStore.setState({ settings: pulled.settings });
-                setSyncDone(true);
               });
             });
           } else {
-            // New user — show onboarding
             setShowOnboarding(true);
           }
         });
     });
   }, [session]);
 
-  // Loading state — also wait for Supabase sync to complete
-  if (loading || showOnboarding === null || (session && !syncDone && showOnboarding === false)) {
+  // Loading state — only wait for auth, not Supabase sync
+  if (loading || showOnboarding === null) {
     return (
       <View style={{ flex: 1, backgroundColor: Colors.background, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color={Colors.primary} />
@@ -71,7 +66,7 @@ function AppContent() {
     return <OnboardingScreen onFinish={() => setShowOnboarding(false)} />;
   }
 
-  // Main app
+  // Main app — show immediately, data loads in background
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />

@@ -72,8 +72,6 @@ export default function DashboardScreen() {
     return (b as any).currentStreak - (a as any).currentStreak;
   });
 
-  const hasData = profile.xp > 0 || profile.totalWorkouts > 0;
-
   // Streak calendar (last 7 days) — use workouts from store hook, not getState()
   const allWorkouts = useStore((s: any) => s.workouts);
   const streakDays = Array.from({ length: 7 }, (_, i) => {
@@ -86,16 +84,6 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {!hasData ? (
-        <FadeInView delay={0}>
-          <EmptyState
-            icon='⚔️'
-            title='Welcome to BerserkLifts'
-            description='Complete your first workout to start your journey and begin leveling up your character.'
-            actionLabel='Start Training'
-          />
-        </FadeInView>
-      ) : (
         <>
           {/* Header */}
           <FadeInView delay={0}>
@@ -288,7 +276,6 @@ export default function DashboardScreen() {
 
           <View style={{ height: 40 }} />
         </>
-      )}
 
       <ChallengesScreen visible={showChallenges} onClose={() => setShowChallenges(false)} />
 
