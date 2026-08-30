@@ -6,10 +6,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // ============================================
 
 export async function syncProfileToSupabase(userId: string, profile: any) {
+  // Use UPDATE only — the trigger already creates the row on signup
   const { error } = await supabase
     .from('profiles')
-    .upsert({
-      id: userId,
+    .update({
       name: profile.name,
       avatar: profile.avatar,
       xp: profile.xp,
@@ -21,21 +21,23 @@ export async function syncProfileToSupabase(userId: string, profile: any) {
       longest_streak: profile.longestStreak,
       total_prs: profile.totalPRs,
       preferred_unit: profile.preferredUnit,
-    }, { onConflict: 'id' });
+    })
+    .eq('id', userId);
   if (error) console.error('Profile sync error:', error);
 }
 
 export async function syncWorkoutsToSupabase(userId: string, workouts: any[]) {
-  // Only sync last 50 workouts to avoid huge payloads
-  const recent = workouts.slice(0, 50);
+  // Delete existing workouts for this user, then re-insert
+  await supabase.from('workouts').delete().eq('user_id', userId);
+  if (workouts.length === 0) return;
   const { error } = await supabase
     .from('workouts')
-    .upsert(
-      recent.map(w => ({
+    .insert(
+      workouts.map(w => ({
         id: w.id,
         user_id: userId,
         name: w.name,
-        exercises: w.exercises,
+        exercises: JSON.stringify(w.exercises),
         date: w.date,
         start_time: w.startTime,
         end_time: w.endTime,
@@ -43,16 +45,17 @@ export async function syncWorkoutsToSupabase(userId: string, workouts: any[]) {
         total_volume: w.totalVolume,
         xp_gained: w.xpGained || 0,
         prs_hit: w.prsHit || [],
-      })),
-      { onConflict: 'id' }
+      }))
     );
   if (error) console.error('Workouts sync error:', error);
 }
 
 export async function syncHabitsToSupabase(userId: string, habits: any[]) {
+  await supabase.from('habits').delete().eq('user_id', userId);
+  if (habits.length === 0) return;
   const { error } = await supabase
     .from('habits')
-    .upsert(
+    .insert(
       habits.map(h => ({
         id: h.id,
         user_id: userId,
@@ -60,39 +63,40 @@ export async function syncHabitsToSupabase(userId: string, habits: any[]) {
         icon: h.icon,
         completed_dates: h.completedDates,
         streak: h.streak,
-      })),
-      { onConflict: 'id' }
+      }))
     );
   if (error) console.error('Habits sync error:', error);
 }
 
 export async function syncRoutinesToSupabase(userId: string, routines: any[]) {
+  await supabase.from('routines').delete().eq('user_id', userId);
+  if (routines.length === 0) return;
   const { error } = await supabase
     .from('routines')
-    .upsert(
+    .insert(
       routines.map(r => ({
         id: r.id,
         user_id: userId,
         name: r.name,
-        exercises: r.exercises,
+        exercises: JSON.stringify(r.exercises),
         folder_id: r.folderId,
-      })),
-      { onConflict: 'id' }
+      }))
     );
   if (error) console.error('Routines sync error:', error);
 }
 
 export async function syncFoldersToSupabase(userId: string, folders: any[]) {
+  await supabase.from('folders').delete().eq('user_id', userId);
+  if (folders.length === 0) return;
   const { error } = await supabase
     .from('folders')
-    .upsert(
+    .insert(
       folders.map(f => ({
         id: f.id,
         user_id: userId,
         name: f.name,
         color: f.color,
-      })),
-      { onConflict: 'id' }
+      }))
     );
   if (error) console.error('Folders sync error:', error);
 }
