@@ -1,6 +1,8 @@
 import { Habit } from '@/types';
 import { generateId } from '@/utils';
 import { calculateLevel, calculateRank } from '@/constants/rpg';
+import { pushAllToSupabase } from '@/lib/syncUtils';
+import { supabase } from '@/lib/supabase';
 
 const XP_HABIT_BONUS = 10; // XP per habit completed
 
@@ -72,6 +74,13 @@ export const habitActions = (set: any, get: any) => ({
         },
       });
     }
+
+    // Auto-sync to Supabase after habit toggle
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        pushAllToSupabase(session.user.id, get());
+      }
+    });
   },
 
   deleteHabit: (id: string) => {

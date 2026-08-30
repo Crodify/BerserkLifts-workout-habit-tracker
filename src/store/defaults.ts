@@ -49,11 +49,7 @@ export const defaultExercises: Exercise[] = [
   { id: '30', name: 'Close Grip Bench Press', muscle: 'Arms', equipment: 'Barbell' },
 ];
 
-export const defaultFriends: Friend[] = [
-  { id: '1', name: 'Guts', avatar: '⚔️', xp: 8500, rank: 'B', totalVolume: 125000 },
-  { id: '2', name: 'Griffith', avatar: '🦅', xp: 12000, rank: 'A', totalVolume: 180000 },
-  { id: '3', name: 'Casca', avatar: '🛡️', xp: 5200, rank: 'C', totalVolume: 78000 },
-];
+export const defaultFriends: Friend[] = [];
 
 export const defaultSettings = {
   weightUnit: 'kg' as const,

@@ -2,6 +2,8 @@ import { Workout, PersonalRecord } from '@/types';
 import { calculateWorkoutVolume, generateWorkoutName, calculateWorkoutStreak } from '@/utils/workoutHelpers';
 import { findBest1RM, findMaxWeight } from '@/utils/prCalculations';
 import { calculateLevel, calculateRank } from '@/constants/rpg';
+import { pushAllToSupabase } from '@/lib/syncUtils';
+import { supabase } from '@/lib/supabase';
 
 // XP Award System
 const XP_BASE = 50; // Base XP for completing a workout
@@ -138,6 +140,13 @@ export const workoutCompletionActions = (set: any, get: any) => ({
         newLevel,
         newRank,
       },
+    });
+
+    // Auto-sync to Supabase after workout completion
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        pushAllToSupabase(session.user.id, get());
+      }
     });
   },
 });

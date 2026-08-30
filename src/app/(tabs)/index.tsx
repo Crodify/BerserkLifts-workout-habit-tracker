@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/theme';
 import { useStore } from '@/store';
@@ -7,6 +7,7 @@ import { formatNumber } from '@/utils';
 import { EmptyState } from '@/components/EmptyState';
 import { ChallengesScreen } from '@/components/ChallengesScreen';
 import { LevelUpPopup } from '@/components/LevelUpPopup';
+import { loadRealUsersFromSupabase } from '@/lib/leaderboardUtils';
 
 const FadeInView = ({ delay, children }: { delay: number; children: React.ReactNode }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -29,15 +30,23 @@ const FadeInView = ({ delay, children }: { delay: number; children: React.ReactN
 type LeaderboardTab = 'volume' | 'workouts' | 'streak';
 
 export default function DashboardScreen() {
-  const { profile, friends, challenges, updateChallengeScores } = useStore();
+  const { profile, challenges, updateChallengeScores } = useStore();
   const levelProgress = calculateLevelProgress(profile.xp);
   const xpToNext = calculateXPForNextLevel(profile.xp);
   const [showChallenges, setShowChallenges] = useState(false);
   const [leaderboardTab, setLeaderboardTab] = useState<LeaderboardTab>('volume');
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [levelUpData, setLevelUpData] = useState<any>(null);
+  const [realUsers, setRealUsers] = useState<any[]>([]);
 
   const activeChallenges = challenges.filter((c: any) => c.status === 'active');
+
+  // Load real users from Supabase on mount
+  useEffect(() => {
+    loadRealUsersFromSupabase().then(users => {
+      setRealUsers(users);
+    });
+  }, []);
 
   // Check for level up after workout
   useEffect(() => {
@@ -50,10 +59,10 @@ export default function DashboardScreen() {
     }
   }, [profile.xp]);
 
-  // Build leaderboard based on tab — use 'user' as ID to avoid collision with friend IDs
+  // Build leaderboard from real Supabase users — exclude current user
   const allFriends = [
     { ...profile, id: '__user__', name: 'You', isUser: true },
-    ...friends.filter((f: any) => f.id !== profile.id), // Remove any friend with same ID as profile
+    ...realUsers.filter((f: any) => f.id !== profile.id && f.id !== 'user'),
   ];
 
   const sortedFriends = [...allFriends].sort((a, b) => {

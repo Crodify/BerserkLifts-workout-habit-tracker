@@ -37,7 +37,6 @@ export function OnboardingScreen({ onFinish }: Props) {
   };
 
   const handleFinish = async () => {
-    // Update profile name and avatar
     const store = useStore.getState();
     useStore.setState({
       profile: {
@@ -50,7 +49,19 @@ export function OnboardingScreen({ onFinish }: Props) {
         weightUnit: unit,
       },
     });
-    // Mark onboarding as complete
+    // Save to Supabase
+    try {
+      const { supabase } = await import('@/lib/supabase');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await import('@/lib/syncUtils').then(({ pushAllToSupabase }) => {
+          pushAllToSupabase(session.user.id, useStore.getState());
+        });
+      }
+    } catch (e) {
+      console.log('Supabase sync skipped (offline?)', e);
+    }
+    // Mark onboarding as complete in AsyncStorage as fallback
     await AsyncStorage.setItem('arise-onboarding-done', 'true');
     onFinish();
   };
