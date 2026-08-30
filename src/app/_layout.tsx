@@ -52,8 +52,8 @@ function AppContent() {
     });
   }, [session]);
 
-  // Loading state
-  if (loading || showOnboarding === null) {
+  // Loading state — also wait for Supabase sync to complete
+  if (loading || showOnboarding === null || (session && !syncDone && showOnboarding === false)) {
     return (
       <View style={{ flex: 1, backgroundColor: Colors.background, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color={Colors.primary} />
