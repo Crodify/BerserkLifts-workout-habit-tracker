@@ -12,3 +12,6 @@ Hevyrefimage/
 
 # Agency Agents (reference only)
 .agency-agents/
+
+.vercel
+.env*
