@@ -19,31 +19,49 @@ function AppContent() {
       setShowOnboarding(false);
       return;
     }
-    // Check Supabase for existing profile
-    import('@/lib/supabase').then(({ supabase }) => {
-      supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', session.user.id)
-        .single()
-        .then(({ data }) => {
-          if (data) {
-            // Returning user — skip onboarding, pull data in background
-            setShowOnboarding(false);
-            import('@/lib/syncUtils').then(({ pullAllFromSupabase }) => {
-              pullAllFromSupabase(session.user.id).then(pulled => {
-                if (pulled.profile) useStore.setState({ profile: pulled.profile });
-                if (pulled.workouts.length > 0) useStore.setState({ workouts: pulled.workouts });
-                if (pulled.habits.length > 0) useStore.setState({ habits: pulled.habits });
-                if (pulled.routines.length > 0) useStore.setState({ routines: pulled.routines });
-                if (pulled.folders.length > 0) useStore.setState({ folders: pulled.folders });
-                if (pulled.settings) useStore.setState({ settings: pulled.settings });
-              });
-            });
-          } else {
-            setShowOnboarding(true);
-          }
+    // Check AsyncStorage first — if onboarding was already completed, skip it
+    AsyncStorage.getItem('arise-onboarding-done').then(done => {
+      if (done === 'true') {
+        setShowOnboarding(false);
+        // Still pull data from Supabase in background
+        import('@/lib/syncUtils').then(({ pullAllFromSupabase }) => {
+          pullAllFromSupabase(session.user.id).then(pulled => {
+            if (pulled.profile) useStore.setState({ profile: pulled.profile });
+            if (pulled.workouts.length > 0) useStore.setState({ workouts: pulled.workouts });
+            if (pulled.habits.length > 0) useStore.setState({ habits: pulled.habits });
+            if (pulled.routines.length > 0) useStore.setState({ routines: pulled.routines });
+            if (pulled.folders.length > 0) useStore.setState({ folders: pulled.folders });
+            if (pulled.settings) useStore.setState({ settings: pulled.settings });
+          });
         });
+      } else {
+        // Check Supabase for existing profile
+        import('@/lib/supabase').then(({ supabase }) => {
+          supabase
+            .from('profiles')
+            .select('id')
+            .eq('id', session.user.id)
+            .single()
+            .then(({ data }) => {
+              if (data) {
+                setShowOnboarding(false);
+                AsyncStorage.setItem('arise-onboarding-done', 'true');
+                import('@/lib/syncUtils').then(({ pullAllFromSupabase }) => {
+                  pullAllFromSupabase(session.user.id).then(pulled => {
+                    if (pulled.profile) useStore.setState({ profile: pulled.profile });
+                    if (pulled.workouts.length > 0) useStore.setState({ workouts: pulled.workouts });
+                    if (pulled.habits.length > 0) useStore.setState({ habits: pulled.habits });
+                    if (pulled.routines.length > 0) useStore.setState({ routines: pulled.routines });
+                    if (pulled.folders.length > 0) useStore.setState({ folders: pulled.folders });
+                    if (pulled.settings) useStore.setState({ settings: pulled.settings });
+                  });
+                });
+              } else {
+                setShowOnboarding(true);
+              }
+            });
+        });
+      }
     });
   }, [session]);
 
