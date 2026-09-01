@@ -62,22 +62,25 @@ The store is split across multiple files merged in `src/store/index.ts`:
 - ✅ Profile tab (needs build-out)
 
 ## Rules for Agents
-1. **Never run `npm run reset-project`** — it deletes everything
-2. **Never delete files** without asking — only create/modify
-3. **Use `src/constants/theme.ts`** for all colors/spacing/borders
-4. **Zustand for all state** — no prop drilling, no Context API
-5. **TypeScript strict** — avoid `any` when possible
-6. **Dark theme only** — no light mode
-7. **Test with `npx tsc --noEmit`** before committing
+1. **Token-Saving Rule: Claude Plans → Gemini Builds**
+   - **Claude's Duty:** When asked for `/plan` or architectural work, formulate the exact blueprint, file list, logic formulas, and edge cases in `implementation_plan.md` or concise markdown, then STOP. Do NOT dump massive whole-file code unless specifically commanded.
+   - **Gemini's Duty:** Takes the plan, generates all files, handles large code output, applies styling/animations, and tests compilation.
+2. **Never run `npm run reset-project`** — it deletes everything
+3. **Never delete files** without asking — only create/modify
+4. **Use `src/constants/theme.ts`** for all colors/spacing/borders
+5. **Zustand for all state** — no prop drilling, no Context API
+6. **TypeScript strict** — avoid `any` when possible
+7. **Dark theme only** — no light mode
+8. **Test with `npx tsc --noEmit`** before completing any task
 
-## Model Recommendations for Cline
-| Task | Best Model | Why |
-|------|-----------|-----|
-| UI/CSS/Animations | Gemini 2.5 Pro | Best visual reasoning |
-| Complex logic/state | Claude Opus | Best reasoning + code |
-| Quick bug fixes | MIMO 2.5 | Fast + free |
-| Architecture planning | Claude Opus | Deep understanding |
-| Documentation | Gemini 3.6 Flash | Fast + cheap |
+## Model Recommendations
+| Task | Best Model | Role |
+|------|-----------|------|
+| Architecture / Planning | Claude Sonnet / Opus | Produce concise, high-density implementation plan |
+| Full Code Implementation | Gemini 2.5 Pro / 3.7 Flash | Write code, build UI, animations, multi-file edits |
+| Code Review & Auditing | Claude Sonnet / Opus | Catch subtle bugs, race conditions, edge cases |
+| Quick Fixes / Typos | MIMO 2.5 / Fast Model | Instant one-line corrections |
 
 ## Current Branch
 `master` — all changes go here
+

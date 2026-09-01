@@ -204,7 +204,7 @@ export default function ProgressScreen() {
         ))
       )}
 
-      <View style={{ height: 40 }} />
+      <View style={{ height: 140 }} />
     </ScrollView>
   );
 }

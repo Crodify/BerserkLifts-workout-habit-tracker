@@ -29,25 +29,58 @@ src/
 
 ---
 
-## 2. Agent Roles & Model Recommendations
+## 2. Agent Roles & Token-Saving Protocol
 
-| Role | Best Model | Cost | Use For |
-|------|-----------|------|---------|
-| **Buffy (me)** | MIMO 2.5 | Free | Architecture, complex features, full context |
-| **UI Designer** | Gemini 2.5 Pro | $1.25/M input | Visual polish, animations, pixel-perfect UI |
-| **Frontend Dev** | Claude Opus | $15/M input | Multi-file refactors, complex components |
-| **Quick Fixes** | MIMO 2.5 | Free | Bug fixes, simple changes, prototyping |
-| **Code Review** | Gemini 3.6 Flash | $0.75/M input | Fast reviews, catching issues |
+### 💡 Core Workflow: Claude Plans → Gemini Builds
+To minimize token costs and maximize execution speed:
 
-### How to Use in Cline:
-1. Select the model in Cline's model picker (via OmniRoute)
-2. Paste the relevant agent prompt from `.agents/specialized/`
-3. Start with "Read CLAUDE.md for context, then..."
-4. Give the specific task
+```
+┌────────────────────────────────────────────────────────┐
+│ 🧠 Claude (Architect & Reviewer)                       │
+│ • Deep reasoning, system architecture, edge cases      │
+│ • Produces concise, exact Implementation Plans         │
+│ • Performs thorough pre-commit code reviews            │
+│ • STOPS after planning — does NOT dump full code       │
+└────────────────────────┬───────────────────────────────┘
+                         │ (User passes plan)
+                         ▼
+┌────────────────────────────────────────────────────────┐
+│ ⚡ Gemini (Builder & Implementer)                      │
+│ • Fast, high-capacity, cost-effective execution       │
+│ • Writes full components, styles, & store slices       │
+│ • Delivers pixel-perfect UI & animations               │
+│ • Runs `npx tsc --noEmit` & verifies zero errors      │
+└────────────────────────────────────────────────────────┘
+```
+
+| Role | Best Model | Primary Duty | Output Mode |
+|------|-----------|--------------|-------------|
+| **Claude (Architect / Reviewer)** | Claude Sonnet / Opus | Architecture, planning, edge-case analysis, review | **Plan & Blueprint only** (no heavy code dumping) |
+| **Gemini (Builder / Coder)** | Gemini 2.5 Pro / 3.7 Flash | Full code implementation, file edits, UI design, animations | **Full working code & edits** |
+| **MIMO / Fast Model** | MIMO 2.5 | Quick bug fixes, single-line edits, syntax fixes | Fast targeted patches |
 
 ---
 
-## 3. GStack Skills
+## 3. How to Use in Cline / Chat
+
+1. **When using Claude**:
+   - Ask: `"/plan [feature description]"`.
+   - Claude investigates the codebase, defines the exact file structure, logic flow, math/formulas, and writes `implementation_plan.md`.
+   - Claude stops and hands off to you.
+
+2. **When using Gemini**:
+   - Switch model to Gemini.
+   - Say: `"Implement the plan created by Claude"`.
+   - Gemini writes/edits all files, creates components, updates stores, and runs `npx tsc --noEmit`.
+
+3. **When doing Code Review**:
+   - Switch to Claude or review agent.
+   - Say: `"/review [feature or files]"`.
+   - Claude reviews for bugs, edge cases, type errors, and performance.
+
+---
+
+## 4. GStack Skills
 
 | Command | What It Does |
 |---------|--------------|
@@ -65,18 +98,10 @@ src/
 
 ---
 
-## 4. Multi-Agent Workflow
+## 5. Multi-Agent Workflow
 
-```
-You (PM) → Assign tasks to the right agent
-    │
-    ├── Buffy: "Build the habits store actions"
-    ├── Cline + Gemini: "Make the habits UI pixel-perfect"
-    ├── Cline + Claude: "Review all changes for bugs"
-    └── Buffy: "Wire everything together, test, commit"
-```
+See `MULTI-AGENT-GUIDE.md` for detailed task splitting examples and prompt templates.
 
-See `MULTI-AGENT-GUIDE.md` for detailed task splitting examples.
 
 ---
 

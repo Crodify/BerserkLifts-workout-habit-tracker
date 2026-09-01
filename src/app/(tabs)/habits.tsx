@@ -154,7 +154,7 @@ export default function HabitsScreen() {
           <Text style={st.addBtnTxt}>+ ADD HABIT</Text>
         </TouchableOpacity>
 
-        <View style={{ height: 40 }} />
+        <View style={{ height: 140 }} />
       </ScrollView>
 
       <AddHabitModal visible={showAdd} onClose={() => setShowAdd(false)} onCreate={handleCreate} />

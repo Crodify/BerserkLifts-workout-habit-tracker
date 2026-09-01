@@ -274,7 +274,7 @@ export default function DashboardScreen() {
             </View>
           </FadeInView>
 
-          <View style={{ height: 40 }} />
+          <View style={{ height: 140 }} />
         </>
 
       <ChallengesScreen visible={showChallenges} onClose={() => setShowChallenges(false)} />

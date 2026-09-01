@@ -183,7 +183,7 @@ export default function ProfileScreen() {
         })
       )}
 
-      <View style={{ height: 40 }} />
+      <View style={{ height: 140 }} />
       <SettingsScreen visible={showSettings} onClose={() => setShowSettings(false)} />
     </ScrollView>
   );

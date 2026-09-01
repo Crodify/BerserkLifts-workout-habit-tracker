@@ -1,95 +1,67 @@
-# BerserkLifts — Multi-Agent Workflow Guide
+# BerserkLifts — Multi-Agent Workflow & Token-Saving Guide
 
-## How Agents Work Together
+## 💡 The Token-Saving Protocol: Claude (Plan/Review) → Gemini (Build)
+
+To achieve maximum code quality while saving significant token costs:
 
 ```
-You (Project Manager)
-    │
-    ├── Buffy (Freebuff) — Full codebase context, architecture, complex features
-    ├── Cline + Claude Opus — Deep reasoning, multi-file refactors
-    ├── Cline + Gemini 2.5 Pro — UI design, visual polish, animations
-    └── Cline + MIMO 2.5 — Quick fixes, simple features, prototyping
+Step 1: 🧠 Claude (Architect)
+  • You prompt: "/plan [Feature/Screen/Bugfix]"
+  • Claude outputs a comprehensive Implementation Plan with files, logic, types, and edge cases.
+  • Claude STOPS without generating massive code files.
+
+Step 2: ⚡ Gemini (Builder)
+  • You prompt: "Implement the plan created by Claude"
+  • Gemini creates/edits all files, writes full components, applies animations, and verifies `npx tsc --noEmit`.
+
+Step 3: 🔍 Claude (Reviewer - Optional)
+  • You prompt: "/review"
+  • Claude audits the changes for edge cases, performance, or regressions.
 ```
+
+---
 
 ## Model Assignment Guide
 
-### 🎨 For UI/Visual Work → Gemini 2.5 Pro
+### 🧠 1. When running Claude (Planning & Architecture)
 ```
-Paste this into Cline:
-"Read CLAUDE.md for context. Act as UI Designer. Make the [component] 
-match this design: [paste screenshot/description]. Use exact colors 
-from src/constants/theme.ts. Be pixel-perfect."
-```
-
-### 🧠 For Complex Logic → Claude Opus
-```
-Paste this into Cline:
-"Read CLAUDE.md for context. Act as Backend Architect. Implement 
-[feature] with full Zustand store actions, TypeScript types, and 
-proper error handling. Follow existing store patterns in src/store/."
+Prompt:
+"/plan I want to implement [Feature / Animation / Screen].
+Write a detailed technical plan covering:
+- Affected files
+- Data models & Zustand actions
+- Exact logic, math, and animations
+- Edge cases
+Do not generate the full code; just output the complete implementation plan for Gemini to execute."
 ```
 
-### ⚡ For Quick Fixes → MIMO 2.5 (Free)
+### ⚡ 2. When running Gemini (Code Generation & Styling)
 ```
-Paste this into Cline:
-"Read CLAUDE.md for context. Fix [bug] in [file]. Keep changes minimal. 
-Run npx tsc --noEmit to verify."
-```
-
-### 🔍 For Code Review → Any Model
-```
-Paste this into Cline:
-"Read CLAUDE.md for context. Review the changes in [files]. Check for:
-1. TypeScript errors
-2. Logic bugs
-3. Performance issues
-4. Style consistency with theme.ts"
+Prompt:
+"Implement the plan created by Claude.
+- Create/modify all specified files
+- Use design tokens from src/constants/theme.ts
+- Ensure dark theme (#0A0A0A) and pixel-perfect polish
+- Run npx tsc --noEmit to verify zero TypeScript errors."
 ```
 
-## Task Splitting Examples
-
-### Example 1: Build Habits Tab
-| Agent | Task |
-|-------|------|
-| **Buffy** | Define Habit type, store actions, data structure |
-| **Cline + Gemini** | Build the UI: habit cards, streak display, check animation |
-| **Buffy** | Wire up to profile stats, add XP rewards |
-
-### Example 2: Build Progress Tab
-| Agent | Task |
-|-------|------|
-| **Cline + Claude** | Volume calculation utils, PR detection logic |
-| **Cline + Gemini** | Charts, graphs, progress visualization UI |
-| **Buffy** | Connect to store, test end-to-end |
-
-### Example 3: Fix a Bug
-| Agent | Task |
-|-------|------|
-| **Buffy** | Investigate root cause, identify affected files |
-| **Cline + MIMO** | Apply the fix, run tsc --noEmit |
-| **Buffy** | Verify fix works in preview |
-
-## Agent Files (for Cline)
-Copy content from `.agents/specialized/` files into Cline's system prompt:
-- `frontend-developer.md` — React Native UI tasks
-- `ui-designer.md` — Visual design tasks
-- `code-reviewer.md` — Quality checks
-- `backend-architect.md` — Store/API logic
-
-## Workflow Commands
-
-### In Freebuff (me):
+### 🔍 3. When running Code Review (Claude)
 ```
-"Switch to UI Designer role. Make the habits tab look premium and polished."
-"Switch to Frontend Developer. Build the set logging component."
-"Switch to Code Reviewer. Review workouts.tsx for bugs."
+Prompt:
+"/review Review the recent changes for:
+1. Logic bugs or state race conditions
+2. TypeScript correctness
+3. Android / iOS visual clipping or layout bugs
+4. Performance and memory leaks"
 ```
 
-### In Cline (paste these):
-```
-1. Read CLAUDE.md first
-2. Then read the specific files I need to work on
-3. [Your specific task]
-4. Run npx tsc --noEmit to verify
-5. Don't commit — just make the changes
-```
+---
+
+## Quick Reference Table
+
+| Model | Primary Duty | Output Mode | Cost Profile |
+|---|---|---|---|
+| **Claude (Sonnet / Opus)** | Architecture, Planning, Review | High-density plans, blueprints, reviews | High reasoning / Higher cost |
+| **Gemini (3.7 Flash / 2.5 Pro)** | Code Implementation, UI, Animations | Full working code, large multi-file edits | High speed / Very cost effective |
+| **MIMO 2.5** | Quick targeted fixes, one-line patches | Single-file small edits | Free / Instant |
+
